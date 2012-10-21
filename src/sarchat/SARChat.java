@@ -4,6 +4,12 @@
  */
 package sarchat;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author Michael Mercier <michael_mercier@orange.fr>
@@ -14,6 +20,25 @@ public class SARChat {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
+        if (args[0].equalsIgnoreCase("Server")){
+            try {
+                new Server().createListenSocket(Server.serverPort);
+            } catch (IOException ex) {
+                Logger.getLogger(SARChat.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        else if (args.length == 2){
+            try {
+                Peer peer = new Peer(args[0]);
+                peer.createListenSocket(Server.serverPort);
+                peer.joinGroup(Arrays.asList(args[1].split(";")));
+            } catch (IOException ex) {
+                Logger.getLogger(SARChat.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }else{
+            System.out.println("Usage: \nserver\nto launc a server");
+            System.out.println("UserName UserName;A;B");
+            System.out.println("to launch a peer and join the group with A and B");
+        }
     }
 }

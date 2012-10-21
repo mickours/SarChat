@@ -6,13 +6,11 @@ package sarchat;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.channels.Channel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
-import java.util.Set;
 import sarchat.message.Message;
 
 /**
@@ -20,8 +18,11 @@ import sarchat.message.Message;
  * @author Michael Mercier <michael_mercier@orange.fr>
  */
 public abstract class ConnectedAgent {
+    
+    protected GroupTable group;
+    protected User me;
 
-    public void connect(int port) throws IOException {
+    public void createListenSocket(int port) throws IOException {
         Selector selector = null;
         ServerSocketChannel server = null;
         try {
@@ -64,11 +65,9 @@ public abstract class ConnectedAgent {
         }
     }
 
-    public void messageReceived(Message msg){
+    public abstract void messageReceived(User from, Message msg);
 
-    }
-
-    public void sendMessage(Message msg){
+    public void sendMessage(User sendTo, Message msg){
 
     }
 }
