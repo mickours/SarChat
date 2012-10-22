@@ -6,7 +6,6 @@ package sarchat;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,13 +27,8 @@ public class SARChat {
             }
         }
         else if (args.length == 2){
-            try {
                 Peer peer = new Peer(args[0]);
-                peer.createListenSocket(Server.serverPort);
                 peer.joinGroup(Arrays.asList(args[1].split(";")));
-            } catch (IOException ex) {
-                Logger.getLogger(SARChat.class.getName()).log(Level.SEVERE, null, ex);
-            }
         }else{
             System.out.println("Usage: \nserver\nto launc a server");
             System.out.println("UserName UserName;A;B");

@@ -16,19 +16,24 @@ import sarchat.message.JoinMessage;
 import sarchat.message.Message;
 import sarchat.message.MulticastMessage;
 import sarchat.message.UnicastMessage;
+import sarchat.utils.ConnectionHelper;
 
 /**
  *
  * @author mickours
  */
-public class Peer extends ConnectedAgent{
+public class Peer extends ConnectedAgent {
+
     User server;
     Timer joinTimer = new Timer(true);
     final long serverTimout = 10000;//10s
 
-    public Peer(String myName){
-        me = new User(myName);
+    public Peer(String myName) {
+        int port = ConnectionHelper.getAvailablePort();        
+        
         try {
+            createListenSocket(port);
+            me = new User(myName, port);
             server = new User(InetAddress.getLocalHost(), Server.serverPort);
         } catch (Exception ex) {
             Logger.getLogger(Peer.class.getName()).log(Level.SEVERE, null, ex);
@@ -36,12 +41,12 @@ public class Peer extends ConnectedAgent{
         }
     }
     
-    public void joinGroup(final List<String> groupToJoin){
+    public void joinGroup(final List<String> groupToJoin) {
         GroupTable grpTable = new GroupTable();
         for (String userName : groupToJoin) {
             grpTable.add(new User(userName));
         }
-        sendMessage(server, new JoinMessage(me.name, grpTable));
+        sendMessage(server, new JoinMessage(me, grpTable));
         //set timout
         joinTimer.schedule(new TimerTask() {
             @Override
@@ -54,34 +59,32 @@ public class Peer extends ConnectedAgent{
     @Override
     public void messageReceived(User from, Message msg) {
         assert (msg != null);
-        System.out.println("Peer "+me.name+" received:\n"+msg);
+        System.out.println("Peer " + me.name + " received:\n" + msg);
         
-        if(msg instanceof UnicastMessage){
+        if (msg instanceof UnicastMessage) {
             handleInitMessage(msg);
-        }
-        else if(msg instanceof MulticastMessage){
-            handleChatMessage(from,msg);
-        }
-        else {
+        } else if (msg instanceof MulticastMessage) {
+            handleChatMessage(from, msg);
+        } else {
             assert false;
         }
     }
-
+    
     private void handleInitMessage(Message msg) {
         //JOIN
-        if (msg instanceof JoinMessage){
+        if (msg instanceof JoinMessage) {
             joinTimer.cancel();
             JoinMessage joinMsg = (JoinMessage) msg;
             group = joinMsg.getGroup();
             boolean error;
 //            do{
-                try {
-                    createListenSocket(group.getMyPort(me.name));
-                    error = false;
-                } catch (IOException ex) {
-                    Logger.getLogger(Peer.class.getName()).log(Level.SEVERE, null, ex);
-                    error = true;
-                }
+            try {
+                createListenSocket(group.getMyPort(me.name));
+                error = false;
+            } catch (IOException ex) {
+                Logger.getLogger(Peer.class.getName()).log(Level.SEVERE, null, ex);
+                error = true;
+            }
 //            }while(error);
             sendMessage(server, new AckMessage());
             //set timout
@@ -93,18 +96,17 @@ public class Peer extends ConnectedAgent{
             }, serverTimout);
         }
         //ACK
-        if (msg instanceof AckMessage){
+        if (msg instanceof AckMessage) {
             chatIsReady();
         }
     }
-
+    
     private void handleChatMessage(User from, Message msg) {
         throw new UnsupportedOperationException("Not yet implemented");
     }
-
+    
     private void chatIsReady() {
         //inform the GUI
         throw new UnsupportedOperationException("Not yet implemented");
     }
-    
 }

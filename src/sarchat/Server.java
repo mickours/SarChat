@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package sarchat;
 
 import java.util.HashSet;
@@ -18,6 +14,7 @@ import sarchat.message.UnicastMessage;
  */
 public class Server extends ConnectedAgent {
 
+    // The host:port combination to listen on
     public static final int serverPort = 9999;
     
     @Override
@@ -25,6 +22,7 @@ public class Server extends ConnectedAgent {
         //check if the message is correct
         assert (msg != null);
         assert (msg instanceof UnicastMessage);
+        
         Set<User> waitForAck = new HashSet<User>();
         System.out.println("Server received:\n"+msg);
         //JOIN Received
