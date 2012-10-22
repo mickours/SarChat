@@ -5,8 +5,6 @@
 package sarchat.message;
 
 import java.net.InetAddress;
-import java.util.List;
-import java.util.Set;
 import sarchat.GroupTable;
 import sarchat.User;
 

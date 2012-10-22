@@ -79,7 +79,7 @@ public class Peer extends ConnectedAgent {
             boolean error;
 //            do{
             try {
-                createListenSocket(group.getMyPort(me.name));
+                createListenSocket(me.port);
                 error = false;
             } catch (IOException ex) {
                 Logger.getLogger(Peer.class.getName()).log(Level.SEVERE, null, ex);

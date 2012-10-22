@@ -24,6 +24,20 @@ public class GroupTable extends HashSet<User> {
     GroupTable() {
         super();
     }
+    
+    /**
+     * Recupere l'user qui a l'adresse ip donnee
+     * @param ip cherchee
+     * @return l'user correspondant, null si aucun
+     */
+    public User getUser(InetAddress ip){
+        for (User user : this){
+            if(user.ip.equals(ip)){
+                return user;                
+            }
+        }
+        return null;
+    }
 
     /**
      * set the user name, ip and port in the group
@@ -35,28 +49,14 @@ public class GroupTable extends HashSet<User> {
             if (user.name.equals(userName)){
                 user.ip = ip;
                 if (user.port == -1){
-                    user.port = generatePort();
+                    //TODO : revoir cette focntion
                 }
             }
             if (user.ip == null){
                 groupComplete = false;
             }
         }
-        return groupComplete;
-        
-    }
-
-    private int generatePort() {
-        return currentPort++;
-    }    
-
-    int getMyPort(String name) {
-        for (User user : this) {
-            if (user.name.equals(name)){
-                return user.port;
-            }
-        }
-        throw new RuntimeException("the port should be set");
+        return groupComplete; 
     }
     
 }
