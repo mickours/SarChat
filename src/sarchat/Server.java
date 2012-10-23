@@ -1,8 +1,11 @@
 package sarchat;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import sarchat.message.AckMessage;
 import sarchat.message.JoinMessage;
 import sarchat.message.Message;
@@ -16,6 +19,10 @@ public class Server extends ConnectedAgent {
 
     // The host:port combination to listen on
     public static final int serverPort = 9999;
+    
+    public Server(){
+        //TODO : creation d'une socket d'écoute
+    }
     
     @Override
     public void messageReceived(User from, Message msg) {
@@ -35,19 +42,31 @@ public class Server extends ConnectedAgent {
                 //the group is complete
                 for (Iterator<User> it = group.iterator(); it.hasNext();) {
                     User user = it.next();
-                    sendMessage(user,new JoinMessage(null, group));
+                    try {
+                        sendMessage(user,new JoinMessage(null, group));
+                    } catch (IOException ex) {
+                        Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                     waitForAck.add(user);
                 }
             }
         }
         //ACK Received
         if (msg instanceof AckMessage){
-            sendMessage(from, new AckMessage());
+            try {
+                sendMessage(from, new AckMessage());
+            } catch (IOException ex) {
+                Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+            }
             waitForAck.remove(from);
             if (waitForAck.isEmpty()){
                 for (Iterator<User> it = group.iterator(); it.hasNext();) {
                     User user = it.next();
-                    sendMessage(user,new AckMessage());
+                    try {
+                        sendMessage(user,new AckMessage());
+                    } catch (IOException ex) {
+                        Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             }
         }

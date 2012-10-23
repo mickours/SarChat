@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package sarchat;
 
 import java.net.InetAddress;
@@ -19,7 +15,8 @@ public class User{
         this.name = userName;
     }
 
-    public User(InetAddress ip, int port) {
+    public User(String name, InetAddress ip, int port) {
+        this.name=name;
         this.ip = ip;
         this.port = port;
     }
