@@ -27,88 +27,25 @@ import sarchat.message.Message;
 public abstract class ConnectedAgent {
 
     protected GroupTable group;
-    protected User me;
-    private HashMap<User, SocketChannel> mapUserSocket;
-    private Selector selector;
-
-    public void createListenSocket(int port) throws IOException {
+    protected HashMap<User, SocketChannel> mapUserSocket;
+    protected Selector selector;
+    
+    public ConnectedAgent(){
         selector = null;
-        ServerSocketChannel server = null;
+        mapUserSocket = new HashMap<User, SocketChannel>();
         try {
             selector = Selector.open();
-            server = ServerSocketChannel.open();
-            server.socket().bind(new InetSocketAddress(port));
-            server.configureBlocking(false);
-            server.register(selector, SelectionKey.OP_ACCEPT);
-            while (true) {
-                selector.select();
-                for (Iterator<SelectionKey> i = selector.selectedKeys().iterator(); i.hasNext();) {
-                    SelectionKey key = i.next();
-                    i.remove();
-                    if (key.isConnectable()) {
-                        SocketChannel socketChannel = (SocketChannel) key.channel();
-                        socketChannel.finishConnect();
-                        socketChannel.register(selector, SelectionKey.OP_READ);
-
-
-                        //Adresse de celui qui envoie
-                        InetAddress ipSender = ((InetSocketAddress) ((SocketChannel) key.channel()).getRemoteAddress())
-                                .getAddress();
-
-                        // Ici deux cas : soit on a établi la connection avec le serveur,
-                        // et il faut envoyer un join...
-                        // soit on se connecte avec un autre peer
-                        if (group.getUser(ipSender).name.equals("server")) {
-                            //TODO : Envoyer join au serveur
-                            //Revoir séparation des classes ??
-                        } else {
-                            //Connecté à un autre peer
-                        }
-                    }
-                    if (key.isAcceptable()) {
-                        // accept connection
-                        SocketChannel client = server.accept();
-                        client.configureBlocking(false);
-                        client.socket().setTcpNoDelay(true);
-                        client.register(selector, SelectionKey.OP_READ);
-
-                        //Adresse de celui qui envoie
-                        InetAddress ipSender = ((InetSocketAddress) ((SocketChannel) key.channel()).getRemoteAddress())
-                                .getAddress();
-                        //On recupère l'user correspondant dans le groupe
-                        User sender = group.getUser(ipSender);
-                        if (sender != null) {
-                            //L'user est dans le groupe, on l'ajoute à la list user/socket
-                            mapUserSocket.put(sender, client);
-                        } else { //On ne connait pas la personne qui se connecte : on est sur le serveur ! 
-                            //On s'attend donc à recevoir un join qui nous permettra de mettre la personne dans la liste...
-                        }
-                    }
-                    if (key.isReadable()) {
-                        // ...read messages...
-                        
-                        
-                        //Solution... buffer temporaires pour chaque socketchannel
-                        //en attente de recevoir la totalité de l'objet...
-                    }
-                }
-            }
-        } catch (Throwable e) {
-            throw new RuntimeException("Server failure: " + e.getMessage());
-        } finally {
-            try {
-                selector.close();
-                server.socket().close();
-                server.close();
-                //stopped();
-            } catch (Exception e) {
-                // do nothing - server failed
-            }
+        } catch (IOException ex) {
+            Logger.getLogger(ConnectedAgent.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     public abstract void messageReceived(User from, Message msg);
-
+    
+    public Message readMsg(){
+        return null;
+    }
+    
     //Initiate a connection with another user or the server
     public void initConnection(User connectMewith) {
         if (mapUserSocket.get(connectMewith) == null) {

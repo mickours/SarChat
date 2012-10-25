@@ -1,12 +1,13 @@
 package sarchat;
 
+import java.io.Serializable;
 import java.net.InetAddress;
 
 /**
  *
  * @author Michael Mercier <michael_mercier@orange.fr>
  */
-public class User{
+public class User implements Serializable{
     public String name;
     public InetAddress ip;
     public int port = -1;

@@ -21,14 +21,13 @@ public class SARChat {
     public static void main(String[] args) {
         if (args[0].equalsIgnoreCase("Server")){
             try {
-                new Server().createListenSocket(Server.serverPort);
+                new Server().createServerSocket(Server.serverPort);
             } catch (IOException ex) {
                 Logger.getLogger(SARChat.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         else if (args.length == 2){
-                Peer peer = new Peer(args[0]);
-                peer.joinGroup(Arrays.asList(args[1].split(";")));
+                Peer peer = new Peer(args[0],Arrays.asList(args[1].split(";")));
         }else{
             System.out.println("Usage: \nserver\nto launc a server");
             System.out.println("UserName UserName;A;B");
