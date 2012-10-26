@@ -19,7 +19,7 @@ public class LogicalClock {
         clock++;
     }
 
-    public void updateClock(int msgClock){
-        clock = Math.max(clock, msgClock)+1;
+    public void updateClock(LogicalClock msgClock){
+        clock = Math.max(clock, msgClock.getClock())+1;
     }
 }

@@ -28,7 +28,11 @@ public class SARChat {
         }
         else if (args.length == 2){
                 Peer peer = new Peer(args[0]);
+            try {
                 peer.joinGroup(Arrays.asList(args[1].split(";")));
+            } catch (IOException ex) {
+                Logger.getLogger(SARChat.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }else{
             System.out.println("Usage: \nserver\nto launc a server");
             System.out.println("UserName UserName;A;B");

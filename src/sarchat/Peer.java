@@ -10,8 +10,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import sarchat.message.AckMessage;
 import sarchat.message.JoinMessage;
+import sarchat.message.LogicalClock;
 import sarchat.message.Message;
 import sarchat.message.MulticastMessage;
+import sarchat.message.TextMessage;
 import sarchat.message.UnicastMessage;
 import sarchat.utils.ConnectionHelper;
 
@@ -21,6 +23,7 @@ import sarchat.utils.ConnectionHelper;
  */
 public class Peer extends ConnectedAgent {
 
+    private LogicalClock myClock;
     User server;
     Timer joinTimer = new Timer(true);
     final long serverTimout = 10000;//10s
@@ -115,7 +118,11 @@ public class Peer extends ConnectedAgent {
     }
     
     private void handleChatMessage(User from, Message msg) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        if (msg instanceof TextMessage){
+            TextMessage textMsg = (TextMessage) msg;
+            LogicalClock msgClock = textMsg.getLc();
+            myClock.updateClock(msgClock);
+        }
     }
     
     private void chatIsReady() {
