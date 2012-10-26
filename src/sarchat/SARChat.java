@@ -21,7 +21,7 @@ public class SARChat {
     public static void main(String[] args) {
         if (args[0].equalsIgnoreCase("Server")){
             try {
-                new Server().createListenSocket(Server.serverPort);
+                new Server().createServerSocket(Server.serverPort);
             } catch (IOException ex) {
                 Logger.getLogger(SARChat.class.getName()).log(Level.SEVERE, null, ex);
             }

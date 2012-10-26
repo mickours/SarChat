@@ -4,10 +4,12 @@
  */
 package sarchat.message;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Michael Mercier <michael_mercier@orange.fr>
  */
-public class UnicastMessage implements Message{
+public class UnicastMessage implements Message, Serializable{
 
 }
