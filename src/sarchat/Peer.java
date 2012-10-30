@@ -57,6 +57,14 @@ public class Peer extends ConnectedAgent {
         msgQueue = new MessageToDeliverQueue();
         myClock = new LogicalClock();
     }
+    
+    /**
+     * send the text message "msg" to the user specified in "sendTo"
+     */
+    public void sendTextMessage(User sendTo, TextMessage msg){
+        //inform the GUI
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
 
     public void joinGroup() throws IOException {
         sendMessage(server, new JoinMessage(me, group));
