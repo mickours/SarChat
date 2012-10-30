@@ -27,9 +27,9 @@ public class SARChat {
             }
         }
         else if (args.length == 2){
-                Peer peer = new Peer(args[0]);
+                Peer peer = new Peer(args[0],Arrays.asList(args[1].split(";")));
             try {
-                peer.joinGroup(Arrays.asList(args[1].split(";")));
+                peer.joinGroup();
             } catch (IOException ex) {
                 Logger.getLogger(SARChat.class.getName()).log(Level.SEVERE, null, ex);
             }

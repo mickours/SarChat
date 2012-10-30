@@ -16,4 +16,11 @@ public class TextMessage extends MulticastMessage{
     public String getMessage() {
         return message;
     }
+
+    @Override
+    public String toString() {
+        return " lc=" +getLc() + " message=" + message;
+    }
+    
+    
 }
