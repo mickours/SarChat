@@ -52,14 +52,17 @@ public class Server extends ConnectedAgent {
                     if (key.isReadable()) {
                         // ...read messages...
                         msgReceived = null;
-                        msgReceived = readMsg(key);
-                        if (msgReceived != null) {
-                            messageReceived((SocketChannel) key.channel(), msgReceived);
+                        
+                        //Attente active de la reception de l'intégralité de l'objet
+                        while (msgReceived == null){
+                             msgReceived = readMsg(key);
                         }
+                        messageReceived((SocketChannel) key.channel(), msgReceived);
                     }
                 }
             }
         } catch (Throwable e) {
+            System.out.println("Error : "+e.toString());
             throw new RuntimeException("Server failure: " + e.getMessage());
         } finally {
             try {
@@ -106,7 +109,7 @@ public class Server extends ConnectedAgent {
                 for (Iterator<User> it = group.iterator(); it.hasNext();) {
                     User user = it.next();
                     try {
-                        sendMessage(user, new JoinMessage(null, group));
+                        sendMessage(user, new JoinMessage(group));
                     } catch (IOException ex) {
                         Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
                     }

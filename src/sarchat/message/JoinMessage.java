@@ -16,6 +16,11 @@ public class JoinMessage extends UnicastMessage{
     private User sender;
     private GroupTable group;
 
+    public JoinMessage(GroupTable group) {
+        this.sender = null;
+        this.group = group;
+    }
+
     public JoinMessage(User user, GroupTable group) {
         this.sender = new User(user);
         this.group = group;

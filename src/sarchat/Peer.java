@@ -6,6 +6,7 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Timer;
@@ -33,10 +34,12 @@ public class Peer extends ConnectedAgent {
     public static final Logger log = Logger.getAnonymousLogger();
     Timer joinTimer = new Timer(true);
     final long serverTimout = 10000;//10s
+    private HashMap<SocketChannel, User> mapSocketUser;
 
     public Peer(String myName, final List<String> groupToJoin) {
         super();
         group = new GroupTable();
+        mapSocketUser = new HashMap<SocketChannel, User>();
         for (String userName : groupToJoin) {
             group.add(new User(userName));
         }
@@ -56,6 +59,24 @@ public class Peer extends ConnectedAgent {
         //init multicast transmition
         msgQueue = new MessageToDeliverQueue();
         myClock = new LogicalClock();
+    }
+    
+    //Initiate a connection with another user or the server
+    public void initConnection(User connectMewith) {
+        if (mapUserSocket.get(connectMewith) == null) {
+            try {
+                SocketChannel socketChannel = SocketChannel.open();
+                socketChannel.configureBlocking(false);
+                socketChannel.socket().setTcpNoDelay(true);
+                socketChannel.connect(new InetSocketAddress(connectMewith.ip, connectMewith.port));
+                socketChannel.register(selector, SelectionKey.OP_CONNECT);
+                mapUserSocket.put(connectMewith, socketChannel);
+                mapSocketUser.put(socketChannel, connectMewith);
+            } catch (IOException ex) {
+                Logger.getLogger(ConnectedAgent.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        //Sinon : deja connecte
     }
     
     /**
@@ -83,6 +104,7 @@ public class Peer extends ConnectedAgent {
 
     private void createListenSocket(int port) throws IOException {
         ServerSocketChannel serverSocket = null;
+        Message msgReceived;
         try {
             serverSocket = ServerSocketChannel.open();
             serverSocket.socket().bind(new InetSocketAddress(port));
@@ -126,19 +148,23 @@ public class Peer extends ConnectedAgent {
                         if (sender != null) {
                             //L'user est dans le groupe, on l'ajoute à la list user/socket
                             mapUserSocket.put(sender, client);
-                        } else { //On ne connait pas la personne qui se connecte : on est sur le serveur ! 
-                            //On s'attend donc à recevoir un join qui nous permettra de mettre la personne dans la liste...
+                            mapSocketUser.put(client, sender);
                         }
                     }
                     if (key.isReadable()) {
                         // ...read messages...
-                        //Solution... buffer temporaires pour chaque socketchannel
-                        //en attente de recevoir la totalité de l'objet...
+                        msgReceived = null;
+                        
+                        //Attente active de la reception de l'intégralité de l'objet
+                        while (msgReceived == null){
+                             msgReceived = readMsg(key);
+                        }
+                        messageReceived(mapSocketUser.get((SocketChannel) key.channel()), msgReceived);
                     }
                 }
             }
         } catch (Throwable e) {
-            throw new RuntimeException("Server failure: " + e.getMessage());
+            throw new RuntimeException("Peer failure: " + e.getMessage());
         } finally {
             try {
                 selector.close();
@@ -150,7 +176,6 @@ public class Peer extends ConnectedAgent {
             }
         }
     }
-
     
     public void messageReceived(User from, Message msg) {
         assert (msg != null);
@@ -175,15 +200,15 @@ public class Peer extends ConnectedAgent {
             joinTimer.cancel();
             JoinMessage joinMsg = (JoinMessage) msg;
             group = joinMsg.getGroup();
-            boolean error;
+//            boolean error;
 //            do{
-            try {
-                createListenSocket(me.port);
-                error = false;
-            } catch (IOException ex) {
-                log.log(Level.SEVERE, null, ex);
-                error = true;
-            }
+//            try {
+//                createListenSocket(me.port);
+//                error = false;
+//            } catch (IOException ex) {
+//                log.log(Level.SEVERE, null, ex);
+//                error = true;
+//            }
 //            }while(error);
             sendMessage(server, new AckMessage());
             //set timout

@@ -67,23 +67,6 @@ public abstract class ConnectedAgent {
         return null;
     }
 
-    //Initiate a connection with another user or the server
-    public void initConnection(User connectMewith) {
-        if (mapUserSocket.get(connectMewith) == null) {
-            try {
-                SocketChannel socketChannel = SocketChannel.open();
-                socketChannel.configureBlocking(false);
-                socketChannel.socket().setTcpNoDelay(true);
-                socketChannel.connect(new InetSocketAddress(connectMewith.ip, connectMewith.port));
-                socketChannel.register(selector, SelectionKey.OP_CONNECT);
-                mapUserSocket.put(connectMewith, socketChannel);
-            } catch (IOException ex) {
-                Logger.getLogger(ConnectedAgent.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-        //Sinon : deja connecte
-    }
-
     public void sendMessage(User sendTo, Message msg) throws IOException {
         SocketChannel socketWhereToSend = mapUserSocket.get(sendTo);
         if (socketWhereToSend != null && socketWhereToSend.isConnected()) {
