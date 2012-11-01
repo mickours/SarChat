@@ -50,7 +50,7 @@ public class Peer extends ConnectedAgent {
 
             server = new User("server", InetAddress.getLocalHost(), Server.serverPort);
             //Se connecter au serveur
-            this.initConnection(server);
+            initConnection(server);
             createListenSocket(port);
         } catch (Exception ex) {
             log.log(Level.SEVERE, null, ex);
@@ -198,6 +198,8 @@ public class Peer extends ConnectedAgent {
         //JOIN
         if (msg instanceof JoinMessage) {
             joinTimer.cancel();
+            joinTimer = null;
+            joinTimer = new Timer(true);
             JoinMessage joinMsg = (JoinMessage) msg;
             group = joinMsg.getGroup();
 //            boolean error;
