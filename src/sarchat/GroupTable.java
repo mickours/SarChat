@@ -38,6 +38,15 @@ public class GroupTable extends HashSet<User> {
         }
         return null;
     }
+    
+    public User getUser(String name){
+        for (User user : this){
+            if(user.name.equals(name)){
+                return user;                
+            }
+        }
+        return null;
+    }
 
     /**
      * set the user name, ip and port in the group

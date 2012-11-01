@@ -1,6 +1,7 @@
 package sarchat;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
@@ -19,13 +20,14 @@ import sarchat.message.UnicastMessage;
  *
  * @author Michael Mercier <michael_mercier@orange.fr>
  */
-public class Server extends ConnectedAgent{
-    
+public class Server extends ConnectedAgent {
+
     // The host:port combination to listen on
     public static final int serverPort = 9999;
-    
+
     public void createServerSocket(int port) throws IOException {
         ServerSocketChannel server = null;
+        Message msgReceived;
         try {
             server = ServerSocketChannel.open();
             server.socket().bind(new InetSocketAddress(port));
@@ -49,10 +51,11 @@ public class Server extends ConnectedAgent{
                     }
                     if (key.isReadable()) {
                         // ...read messages...
-                        System.out.println("BOUILLLLLLAA");
-                        
-                        //Solution... buffer temporaires pour chaque socketchannel
-                        //en attente de recevoir la totalité de l'objet...
+                        msgReceived = null;
+                        msgReceived = readMsg(key);
+                        if (msgReceived != null) {
+                            messageReceived((SocketChannel) key.channel(), msgReceived);
+                        }
                     }
                 }
             }
@@ -69,27 +72,41 @@ public class Server extends ConnectedAgent{
             }
         }
     }
-    
-    @Override
-    public void messageReceived(User from, Message msg) {
+
+    public void messageReceived(SocketChannel socketFrom, Message msg) {
+        
+        //Adresse de celui qui envoie
+        InetAddress ipSender = null;
+        try {
+            ipSender = ((InetSocketAddress) socketFrom.getRemoteAddress())
+        .getAddress();
+        } catch (IOException ex) {
+            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         //check if the message is correct
         assert (msg != null);
         assert (msg instanceof UnicastMessage);
-        
+
         Set<User> waitForAck = new HashSet<User>();
-        System.out.println("Server received:\n"+msg);
+        System.out.println("Server received:\n" + msg);
         //JOIN Received
-        if (msg instanceof JoinMessage){
+        if (msg instanceof JoinMessage) {
             JoinMessage joinMsg = (JoinMessage) msg;
-            if (group == null){
+            if (group == null) {
                 group = new GroupTable(joinMsg.getGroup());
             }
-            if (group.userJoin(joinMsg.getUserName(),from.ip)){
+            String userFromName = joinMsg.getUserName();
+            User userFrom = group.getUser(userFromName);
+            if(!mapUserSocket.containsValue(socketFrom)){
+                mapUserSocket.put(userFrom, socketFrom);
+            }
+            if (ipSender!=null && group.userJoin(userFromName, ipSender)) {
                 //the group is complete
                 for (Iterator<User> it = group.iterator(); it.hasNext();) {
                     User user = it.next();
                     try {
-                        sendMessage(user,new JoinMessage(null, group));
+                        sendMessage(user, new JoinMessage(null, group));
                     } catch (IOException ex) {
                         Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -98,18 +115,19 @@ public class Server extends ConnectedAgent{
             }
         }
         //ACK Received
-        if (msg instanceof AckMessage){
+        if (msg instanceof AckMessage) {
             try {
-                sendMessage(from, new AckMessage());
+                // TODO : voir si on change le send en mode socketchannel...
+                sendMessage(socketFrom, new AckMessage());
             } catch (IOException ex) {
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
             }
-            waitForAck.remove(from);
-            if (waitForAck.isEmpty()){
+            waitForAck.remove(mapUserSocket.get(socketFrom));
+            if (waitForAck.isEmpty()) {
                 for (Iterator<User> it = group.iterator(); it.hasNext();) {
                     User user = it.next();
                     try {
-                        sendMessage(user,new AckMessage());
+                        sendMessage(user, new AckMessage());
                     } catch (IOException ex) {
                         Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -117,5 +135,4 @@ public class Server extends ConnectedAgent{
             }
         }
     }
-    
 }

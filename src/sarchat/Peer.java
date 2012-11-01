@@ -151,7 +151,7 @@ public class Peer extends ConnectedAgent {
         }
     }
 
-    @Override
+    
     public void messageReceived(User from, Message msg) {
         assert (msg != null);
         System.out.println("Peer " + me.name + " received:\n" + msg);
