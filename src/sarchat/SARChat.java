@@ -21,7 +21,8 @@ public class SARChat {
     public static void main(String[] args) {
         if (args[0].equalsIgnoreCase("Server")){
             try {
-                new Server().createServerSocket(Server.serverPort);
+                System.out.println("SARChat Server is running...");
+                new Server().createServerSocket(Server.serverPort);      
             } catch (IOException ex) {
                 Logger.getLogger(SARChat.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -29,7 +30,9 @@ public class SARChat {
         else if (args.length == 2){
                 Peer peer = new Peer(args[0],Arrays.asList(args[1].split(";")));
             try {
-                peer.joinGroup();
+                peer.sendJoinGroupMessage();
+                System.out.println("Peer "+peer+" is running and try to join "+args[0]);
+                peer.createListenSocket();
             } catch (IOException ex) {
                 Logger.getLogger(SARChat.class.getName()).log(Level.SEVERE, null, ex);
             }

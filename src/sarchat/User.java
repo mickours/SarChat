@@ -2,6 +2,7 @@ package sarchat;
 
 import java.io.Serializable;
 import java.net.InetAddress;
+import java.util.Objects;
 
 /**
  *
@@ -31,5 +32,42 @@ public class User implements Serializable{
         this.name = user.name;
         this.ip = user.ip;
         this.port = user.port;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 71 * hash + Objects.hashCode(this.name);
+        hash = 71 * hash + Objects.hashCode(this.ip);
+        hash = 71 * hash + this.port;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final User other = (User) obj;
+        if (!Objects.equals(this.name, other.name)) {
+            return false;
+        }
+        if (!Objects.equals(this.ip, other.ip)) {
+            return false;
+        }
+        if (this.port != other.port) {
+            return false;
+        }
+        return true;
+    }
+    
+    
+
+    @Override
+    public String toString() {
+        return "User{" + "name=" + name + ", ip=" + ip + ", port=" + port + '}';
     }
 }

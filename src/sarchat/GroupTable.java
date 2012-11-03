@@ -12,7 +12,6 @@ import java.util.HashSet;
  * @author Michael Mercier <michael_mercier@orange.fr>
  */
 public class GroupTable extends HashSet<User> {
-    private static int currentPort = 10000;
 
     public GroupTable(GroupTable group) {
         super(group.size());
@@ -25,14 +24,10 @@ public class GroupTable extends HashSet<User> {
         super();
     }
     
-    /**
-     * Recupere l'user qui a l'adresse ip donnee
-     * @param ip cherchee
-     * @return l'user correspondant, null si aucun
-     */
+    
     public User getUser(InetAddress ip){
         for (User user : this){
-            if(user.ip.equals(ip)){
+            if(user.ip != null && user.ip.equals(ip)){
                 return user;                
             }
         }
@@ -52,16 +47,14 @@ public class GroupTable extends HashSet<User> {
      * set the user name, ip and port in the group
      * @return true if all the users have reach the group
      */
-    public boolean userJoin(String userName, InetAddress ip) {
+    public boolean userJoin(User toJoin) {
         boolean groupComplete = true;
         for (User user : this) {
-            if (user.name.equals(userName)){
-                user.ip = ip;
-                if (user.port == -1){
-                    //TODO : revoir cette focntion
-                }
+            if (user.name.equals(toJoin.name)){
+                user.ip = toJoin.ip;
+                user.port = toJoin.port;
             }
-            if (user.ip == null){
+            if (user.ip == null || user.port == -1){
                 groupComplete = false;
             }
         }

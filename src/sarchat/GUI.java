@@ -92,7 +92,7 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(containersGroupLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(TitleBoxGroup)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 245, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 253, Short.MAX_VALUE)
                 .addComponent(addButton)
                 .addGap(18, 18, 18)
                 .addComponent(jButton1)
@@ -245,12 +245,12 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_addButtonActionPerformed
 
     private void SendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SendButtonActionPerformed
-       String textTape;
-       textTape = jTextArea1.getText();
-       TextMessage msg= new TextMessage(textTape);
-       User user1 = new User ("camille");
-       pe.sendTextMessage(user1, msg);
-       System.out.println(msg);
+//       String textTape;
+//       textTape = jTextArea1.getText();
+//       TextMessage msg= new TextMessage(textTape);
+//       User user1 = new User ("camille");
+//       pe.sendTextMessage(user1, msg);
+//       System.out.println(msg);
 
     }//GEN-LAST:event_SendButtonActionPerformed
 

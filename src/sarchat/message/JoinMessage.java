@@ -26,15 +26,17 @@ public class JoinMessage extends UnicastMessage{
         this.group = group;
     }
 
-    public String getUserName() {
-        return sender.name;
-    }
-
     public GroupTable getGroup() {
         return group;
     }
-
-    public InetAddress getIp() {
-        return sender.ip;
+     public User getUser() {
+        return sender;
     }
+
+    @Override
+    public String toString() {
+        return "JoinMessage{" + "sender=" + sender + ", group=" + group + '}';
+    }
+
+   
 }
