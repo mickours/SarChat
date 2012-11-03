@@ -4,6 +4,9 @@
  */
 package sarchat;
 
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
+import sarchat.message.TextMessage;
+
 /**
  *
  * @author Michael Mercier <michael_mercier@orange.fr>
@@ -13,7 +16,7 @@ public class GUI extends javax.swing.JFrame {
     /**
      * Creates new form GUI
      */
-    public GUI() {
+    public GUI(Peer pe) {
         initComponents();
     }
 
@@ -26,6 +29,15 @@ public class GUI extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        containersGroup = new javax.swing.JPanel();
+        TitleBoxGroup = new javax.swing.JLabel();
+        addButton = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
+        containersDialog = new javax.swing.JPanel();
+        containersWrite = new javax.swing.JPanel();
+        SendButton = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTextArea1 = new javax.swing.JTextArea();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         openMenuItem = new javax.swing.JMenuItem();
@@ -42,6 +54,101 @@ public class GUI extends javax.swing.JFrame {
         aboutMenuItem = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("SARChat");
+        setMinimumSize(new java.awt.Dimension(600, 600));
+        setPreferredSize(new java.awt.Dimension(800, 400));
+
+        containersGroup.setBackground(new java.awt.Color(199, 234, 236));
+
+        TitleBoxGroup.setText("Available person");
+
+        addButton.setText("Add person");
+        addButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addButtonActionPerformed(evt);
+            }
+        });
+
+        jButton1.setText("Remove person");
+
+        javax.swing.GroupLayout containersGroupLayout = new javax.swing.GroupLayout(containersGroup);
+        containersGroup.setLayout(containersGroupLayout);
+        containersGroupLayout.setHorizontalGroup(
+            containersGroupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(containersGroupLayout.createSequentialGroup()
+                .addGroup(containersGroupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(containersGroupLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(containersGroupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(addButton)
+                            .addComponent(TitleBoxGroup)))
+                    .addGroup(containersGroupLayout.createSequentialGroup()
+                        .addGap(23, 23, 23)
+                        .addComponent(jButton1)))
+                .addContainerGap(33, Short.MAX_VALUE))
+        );
+        containersGroupLayout.setVerticalGroup(
+            containersGroupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(containersGroupLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(TitleBoxGroup)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 245, Short.MAX_VALUE)
+                .addComponent(addButton)
+                .addGap(18, 18, 18)
+                .addComponent(jButton1)
+                .addGap(20, 20, 20))
+        );
+
+        containersDialog.setBackground(java.awt.Color.white);
+        containersDialog.setForeground(java.awt.Color.white);
+
+        javax.swing.GroupLayout containersDialogLayout = new javax.swing.GroupLayout(containersDialog);
+        containersDialog.setLayout(containersDialogLayout);
+        containersDialogLayout.setHorizontalGroup(
+            containersDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 617, Short.MAX_VALUE)
+        );
+        containersDialogLayout.setVerticalGroup(
+            containersDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 279, Short.MAX_VALUE)
+        );
+
+        containersWrite.setBackground(java.awt.Color.white);
+        containersWrite.setForeground(java.awt.Color.white);
+
+        SendButton.setText("Send");
+        SendButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                SendButtonActionPerformed(evt);
+            }
+        });
+
+        jTextArea1.setColumns(20);
+        jTextArea1.setRows(5);
+        jScrollPane1.setViewportView(jTextArea1);
+
+        javax.swing.GroupLayout containersWriteLayout = new javax.swing.GroupLayout(containersWrite);
+        containersWrite.setLayout(containersWriteLayout);
+        containersWriteLayout.setHorizontalGroup(
+            containersWriteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, containersWriteLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 534, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(SendButton)
+                .addContainerGap())
+        );
+        containersWriteLayout.setVerticalGroup(
+            containersWriteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, containersWriteLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(SendButton)
+                .addGap(32, 32, 32))
+            .addGroup(containersWriteLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
 
         fileMenu.setMnemonic('f');
         fileMenu.setText("File");
@@ -110,11 +217,20 @@ public class GUI extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 478, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(containersGroup, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(containersDialog, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(containersWrite, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 323, Short.MAX_VALUE)
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+            .addComponent(containersGroup, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(containersDialog, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(containersWrite, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         pack();
@@ -124,10 +240,25 @@ public class GUI extends javax.swing.JFrame {
         System.exit(0);
     }//GEN-LAST:event_exitMenuItemActionPerformed
 
+    private void addButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_addButtonActionPerformed
+
+    private void SendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SendButtonActionPerformed
+       String textTape;
+       textTape = jTextArea1.getText();
+       TextMessage msg= new TextMessage(textTape);
+       User user1 = new User ("camille");
+       pe.sendTextMessage(user1, msg);
+       System.out.println(msg);
+
+    }//GEN-LAST:event_SendButtonActionPerformed
+
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
+        final Peer pe = new Peer(null, null);
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
@@ -154,12 +285,18 @@ public class GUI extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new GUI().setVisible(true);
+                new GUI(pe).setVisible(true);
             }
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton SendButton;
+    private javax.swing.JLabel TitleBoxGroup;
     private javax.swing.JMenuItem aboutMenuItem;
+    private javax.swing.JButton addButton;
+    private javax.swing.JPanel containersDialog;
+    private javax.swing.JPanel containersGroup;
+    private javax.swing.JPanel containersWrite;
     private javax.swing.JMenuItem contentsMenuItem;
     private javax.swing.JMenuItem copyMenuItem;
     private javax.swing.JMenuItem cutMenuItem;
@@ -168,6 +305,9 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JMenuItem exitMenuItem;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JMenu helpMenu;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTextArea jTextArea1;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem openMenuItem;
     private javax.swing.JMenuItem pasteMenuItem;
