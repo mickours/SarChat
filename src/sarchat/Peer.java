@@ -32,6 +32,7 @@ public class Peer extends NIOSocketAgent {
     public static final Logger log = Logger.getAnonymousLogger();
     Timer joinTimer = new Timer(true);
     final long serverTimout = 10000;//10s
+    private PeerEventListener listener;
 
     public Peer(String myName, final List<String> groupToJoin) {
         super();
@@ -79,9 +80,10 @@ public class Peer extends NIOSocketAgent {
     /**
      * send the text message "msg" to the user specified in "sendTo"
      */
-    public void sendTextMessage(User sendTo, TextMessage msg) {
-        //inform the GUI
-        throw new UnsupportedOperationException("Not yet implemented");
+    public void sendTextMessage(TextMessage msg) throws IOException {
+        for (User user : myGroup) {
+            sendMessage(user, msg);
+        }
     }
 
     public void sendJoinGroupMessage() throws IOException {
@@ -144,7 +146,8 @@ public class Peer extends NIOSocketAgent {
         //ACK
         if (msg instanceof AckMessage) {
             joinTimer.cancel();
-            chatIsReady();
+//            connectToGroupMembers();
+            fireGroupIsReadyEvent();
         }
     }
 
@@ -168,22 +171,25 @@ public class Peer extends NIOSocketAgent {
             if (msgQueue.ackReceived(from, ack.getSender(), lc)) {
                 Tuple toDeliver = msgQueue.getHeadMessage();
                 log.log(Level.INFO, "{0}{1}", new Object[]{toDeliver.sender, toDeliver.toString()});
-                deliverMessage(toDeliver.msg.getMessage(), toDeliver.sender);
+                fireMessageDeliveredEvent(toDeliver.msg.getMessage(), toDeliver.sender);
             }
         } else {
             assert false;
         }
     }
-
-    private void chatIsReady() {
-        //inform the GUI
-        System.out.println("Chat is ready!");
-        
+    
+    public void setListener(PeerEventListener listener){
+        this.listener = listener;
     }
-
-    private void deliverMessage(String message, User sender) {
-        //inform the GUI
-        throw new UnsupportedOperationException("Not yet implemented");
+    
+    private void fireGroupIsReadyEvent(){
+        if (listener != null){
+            listener.groupIsReady(myGroup);
+        }
+    }
+    
+    private void fireMessageDeliveredEvent(String message, User sender) {
+            listener.messageDelivered(null, server);
     }
 
     @Override
@@ -212,4 +218,9 @@ public class Peer extends NIOSocketAgent {
         
         messageReceived(getUserFromSocket((SocketChannel) key.channel()), msgReceived);
     }
+
+//    private void connectToGroupMembers() {
+//        
+//        initConnection
+//    }
 }

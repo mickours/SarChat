@@ -55,7 +55,7 @@ public abstract class NIOSocketAgent {
             serverSocket.configureBlocking(false);
             serverSocket.register(selector, SelectionKey.OP_ACCEPT);
             while (true) {
-                selector.select(100);
+                selector.select();
                 for (Iterator<SelectionKey> i = selector.selectedKeys().iterator(); i.hasNext();) {
                     SelectionKey key = i.next();
                     i.remove();
@@ -111,7 +111,6 @@ public abstract class NIOSocketAgent {
     }
 
     public void sendMessage(User sendTo, Message msg) throws IOException {
-        System.out.println("send to "+sendTo+":\n\t" + msg);
         SocketChannel socketWhereToSend = userSocketChannelMap.get(sendTo);
         if (socketWhereToSend != null && socketWhereToSend.isConnected()) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -125,6 +124,7 @@ public abstract class NIOSocketAgent {
             wrap.putInt(0, baos.size() - 4);
 
             socketWhereToSend.write(wrap);
+            System.out.println("send to "+sendTo+":\n\t" + msg);
         }
     }
     

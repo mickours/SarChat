@@ -24,16 +24,6 @@ public class GroupTable extends HashSet<User> {
         super();
     }
     
-    
-    public User getUser(InetAddress ip){
-        for (User user : this){
-            if(user.ip != null && user.ip.equals(ip)){
-                return user;                
-            }
-        }
-        return null;
-    }
-    
     public User getUser(String name){
         for (User user : this){
             if(user.name.equals(name)){

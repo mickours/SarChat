@@ -12,6 +12,10 @@ public class TextMessage extends MulticastMessage{
 
 
     private String message;
+
+    public TextMessage(String textTape) {
+        message = textTape;
+    }
     
     public String getMessage() {
         return message;
