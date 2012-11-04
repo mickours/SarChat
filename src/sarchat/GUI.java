@@ -7,7 +7,6 @@ package sarchat;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import sarchat.message.TextMessage;
 
 /**
  *
@@ -328,9 +327,8 @@ public class GUI extends javax.swing.JFrame implements PeerEventListener{
     private void SendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SendButtonActionPerformed
        String textTape;
        textTape = sendMessageTextArea.getText();
-       TextMessage msg= new TextMessage(textTape);
         try {
-            peer.sendTextMessage(msg);
+            peer.sendTextMessage(textTape);
         } catch (IOException ex) {
             Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
         }       

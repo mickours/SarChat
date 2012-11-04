@@ -11,20 +11,21 @@ import sarchat.User;
  * @author mickours
  */
 public class AckMulticastMessage extends MulticastMessage{
-    private LogicalClock msgToAckLogicalClock;
-    private User sender;
+    private TextMessage textMsg;
     
-    public AckMulticastMessage(TextMessage textMsg, User sender) {
-        msgToAckLogicalClock = textMsg.getLc();
-        this.sender = sender;
+    public AckMulticastMessage(TextMessage textMsg, User sender ) {
+        super(-1, sender);
+        this.textMsg = textMsg;
+        
     }
 
-    public LogicalClock getMsgToAckLogicalClock() {
-        return msgToAckLogicalClock;
+    public TextMessage getTextMsg() {
+        return textMsg;
     }
 
-    public User getSender() {
-        return sender;
+    @Override
+    public String toString() {
+        return "AckMulticastMessage{" + "textMsg=" + textMsg + '}';
     }
-    
+
 }

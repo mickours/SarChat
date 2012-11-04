@@ -81,9 +81,9 @@ public class Peer extends NIOSocketAgent {
     /**
      * send the text message "msg" to the user specified in "sendTo"
      */
-    public void sendTextMessage(TextMessage msg) throws IOException {
+    public void sendTextMessage(String string) throws IOException {
+        TextMessage msg = new TextMessage(string, myClock.incrementClock(), me);
         for (User user : myGroup) {
-            msg.setLc(myClock.incrementClock());
             sendMessage(user, msg);
         }
     }
@@ -157,20 +157,19 @@ public class Peer extends NIOSocketAgent {
         if (msg instanceof TextMessage) {
             TextMessage textMsg = (TextMessage) msg;
             //update clock and store msg in a queue
-            LogicalClock msgClock = textMsg.getLc();
+            int msgClock = textMsg.getClock();
             myClock.updateClock(msgClock);
             msgQueue.insertMessage(textMsg, from, myGroup);
             for (User u : myGroup) {
                 try {
-                    sendMessage(u, new AckMulticastMessage(textMsg, from));
+                    sendMessage(u, new AckMulticastMessage(textMsg, me));
                 } catch (IOException ex) {
                     log.log(Level.SEVERE, null, ex);
                 }
             }
         } else if (msg instanceof AckMulticastMessage) {
             AckMulticastMessage ack = (AckMulticastMessage) msg;
-            LogicalClock lc = ack.getMsgToAckLogicalClock();
-            if (msgQueue.ackReceived(from, ack.getSender(), lc)) {
+            if (msgQueue.ackReceived(from, ack.getTextMsg().getSender(), ack.getTextMsg().getClock())) {
                 Tuple toDeliver = msgQueue.getHeadMessage();
                 log.log(Level.INFO, "{0}{1}", new Object[]{toDeliver.sender, toDeliver.toString()});
                 fireMessageDeliveredEvent(toDeliver.msg.getMessage(), toDeliver.sender);
@@ -191,7 +190,7 @@ public class Peer extends NIOSocketAgent {
     }
     
     private void fireMessageDeliveredEvent(String message, User sender) {
-            listener.messageDelivered(null, server);
+        listener.messageDelivered(message, sender);
     }
 
     @Override
@@ -199,15 +198,15 @@ public class Peer extends NIOSocketAgent {
         SocketChannel socketChannel = (SocketChannel) key.channel();
         socketChannel.finishConnect();
         socketChannel.register(selector, SelectionKey.OP_READ);
+        sendMessage(getUserFromSocket(socketChannel), new MulticastMessage(-1, me));
     }
 
     @Override
     protected void receivedAcceptable(SelectionKey key) throws IOException {
-        // accept connection
         SocketChannel client = serverSocket.accept();
         client.configureBlocking(false);
         client.socket().setTcpNoDelay(true);
-        client.register(selector, SelectionKey.OP_READ);       
+        client.register(selector, SelectionKey.OP_READ);     
     }
 
     @Override
@@ -218,6 +217,13 @@ public class Peer extends NIOSocketAgent {
             msgReceived = readMsg(key);
         }
         
+        if (msgReceived instanceof MulticastMessage) {
+            SocketChannel channel = (SocketChannel)key.channel();
+            User sender = ((MulticastMessage)msgReceived).getSender();
+            sender.ip = ((InetSocketAddress) channel.getRemoteAddress())
+                .getAddress();
+            userSocketChannelMap.put(sender, channel);
+        }
         messageReceived(getUserFromSocket((SocketChannel) key.channel()), msgReceived);
     }
 

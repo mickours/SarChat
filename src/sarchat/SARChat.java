@@ -67,7 +67,7 @@ public class SARChat implements PeerEventListener {
         System.out.println("talk:");
         String str = sc.nextLine();
         try {
-            peer.sendTextMessage(new TextMessage(str));
+            peer.sendTextMessage(str);
         } catch (IOException ex) {
             System.out.println("Error while sending your message: \"" + str + "\"");
         }

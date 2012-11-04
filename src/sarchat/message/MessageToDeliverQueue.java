@@ -19,13 +19,12 @@ public class MessageToDeliverQueue {
         }
     }
     
-    LinkedList<Tuple> msgQ = new LinkedList<Tuple>();
+    LinkedList<Tuple> msgQ = new LinkedList<>();
     
     public void insertMessage(TextMessage msg,User from,GroupTable group){
         int ind=0;
-        TextMessage currentMsg = msgQ.get(ind).msg;
-        while (currentMsg != null 
-                && currentMsg.getLc().getClock() < msg.getLc().getClock() ){
+        while (msgQ.size() > ind && msgQ.get(ind).msg != null 
+                && msgQ.get(ind).msg.getClock() < msg.getClock() ){
             ind++;
         }
         msgQ.add(ind, new Tuple(msg,from,group));
@@ -35,14 +34,14 @@ public class MessageToDeliverQueue {
         return msgQ.pop();
     }
     
-    public boolean ackReceived(User ackFrom, User sender, LogicalClock lc) {
+    public boolean ackReceived(User ackFrom, User sender, int lc) {
         for (Tuple tuple : msgQ) {
-            if (tuple.sender.equals(sender) && lc.equals(tuple.msg.getLc())){
+            if (tuple.sender.equals(sender) && lc == tuple.msg.getClock()){
                 tuple.group.remove(ackFrom);
                 return tuple.group.isEmpty();
             }
         }
-        throw new RuntimeException();
+        throw new RuntimeException("the ack from "+ackFrom+" for the message "+lc+":"+sender+" failed");
     }
     
 }
