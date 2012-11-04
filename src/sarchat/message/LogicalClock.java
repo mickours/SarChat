@@ -10,19 +10,21 @@ import java.io.Serializable;
  *
  * @author Michael Mercier <michael_mercier@orange.fr>
  */
-public class LogicalClock implements Serializable{
+public class LogicalClock implements Serializable {
+
     private int clock = 0;
 
     public int getClock() {
         return clock;
     }
 
-    public void incrementClock(){
+    public LogicalClock incrementClock() {
         clock++;
+        return this;
     }
 
-    public void updateClock(LogicalClock msgClock){
-        clock = Math.max(clock, msgClock.getClock())+1;
+    public void updateClock(LogicalClock msgClock) {
+        clock = Math.max(clock, msgClock.getClock()) + 1;
     }
 
     @Override
@@ -39,6 +41,4 @@ public class LogicalClock implements Serializable{
         }
         return true;
     }
-    
-    
 }

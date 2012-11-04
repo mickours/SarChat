@@ -6,6 +6,9 @@ package sarchat;
 
 import java.net.InetAddress;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  *
@@ -49,6 +52,16 @@ public class GroupTable extends HashSet<User> {
             }
         }
         return groupComplete; 
+    }
+
+    List<User> getUserToConnectWith(User me) {
+        List<User> underMeList = new LinkedList();
+        for (User user : this) {
+            if (user.name.compareTo(me.name) >= 0){
+                underMeList.add(user);
+            }
+        }
+        return underMeList;
     }
     
 }

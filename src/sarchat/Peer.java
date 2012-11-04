@@ -63,6 +63,7 @@ public class Peer extends NIOSocketAgent {
 
     //Initiate a connection with another user or the server
     private void initConnection(User connectMeWith) {
+        System.out.println("CONNEXION: "+me.name+" with "+connectMeWith.name);
         if (userSocketChannelMap.get(connectMeWith) == null) {
             try {
                 SocketChannel socketChannel = SocketChannel.open();
@@ -82,6 +83,7 @@ public class Peer extends NIOSocketAgent {
      */
     public void sendTextMessage(TextMessage msg) throws IOException {
         for (User user : myGroup) {
+            msg.setLc(myClock.incrementClock());
             sendMessage(user, msg);
         }
     }
@@ -146,7 +148,7 @@ public class Peer extends NIOSocketAgent {
         //ACK
         if (msg instanceof AckMessage) {
             joinTimer.cancel();
-//            connectToGroupMembers();
+            connectToGroupMembers();
             fireGroupIsReadyEvent();
         }
     }
@@ -219,8 +221,10 @@ public class Peer extends NIOSocketAgent {
         messageReceived(getUserFromSocket((SocketChannel) key.channel()), msgReceived);
     }
 
-//    private void connectToGroupMembers() {
-//        
-//        initConnection
-//    }
+    private void connectToGroupMembers() {
+        List<User> toConnectWith = myGroup.getUserToConnectWith(me);
+        for (User user : toConnectWith) {
+            initConnection(user);
+        }
+    }
 }
