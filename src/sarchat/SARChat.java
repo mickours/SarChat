@@ -76,9 +76,14 @@ public class SARChat implements PeerEventListener {
     @Override
     public void groupIsReady(GroupTable group) {
         System.out.println("The group " + group + " is ready");
-        while (true) {
-            chat();
-        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    chat();
+                }
+            }
+        }).start();
     }
 
     @Override

@@ -4,11 +4,13 @@
  */
 package sarchat.message;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Michael Mercier <michael_mercier@orange.fr>
  */
-public class MulticastMessage implements Message {
+public class MulticastMessage implements Message, Serializable {
     private LogicalClock lc;
 
     public LogicalClock getLc() {
