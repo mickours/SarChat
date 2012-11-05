@@ -15,34 +15,40 @@ public class MessageToDeliverQueue {
         public Tuple(TextMessage msg, User sender,GroupTable group) {
             this.sender = sender;
             this.msg = msg;
-            this.group = group;
+            this.group = new GroupTable(group);
         }
     }
     
-    LinkedList<Tuple> msgQ = new LinkedList<Tuple>();
+    LinkedList<Tuple> msgQ = new LinkedList<>();
     
-    public void insertMessage(TextMessage msg,User from,GroupTable group){
+    public Tuple insertMessage(TextMessage msg,GroupTable group){
+        for (Tuple tuple : msgQ) {
+            if (tuple.msg.getClock() == msg.getClock() && tuple.msg.getSender().equals(msg.getSender())){
+                return tuple;
+            }
+        }
         int ind=0;
-        TextMessage currentMsg = msgQ.get(ind).msg;
-        while (currentMsg != null 
-                && currentMsg.getLc().getClock() < msg.getLc().getClock() ){
+        while (msgQ.size() > ind && msgQ.get(ind).msg.getClock() <= msg.getClock() ){
             ind++;
         }
-        msgQ.add(ind, new Tuple(msg,from,group));
+        msgQ.add(ind, new Tuple(msg,msg.getSender(),group));
+        return msgQ.get(ind);
     }
     
     public Tuple getHeadMessage(){
         return msgQ.pop();
     }
     
-    public boolean ackReceived(User ackFrom, User sender, LogicalClock lc) {
+    public boolean ackReceived(User ackFrom, TextMessage txtMsg, GroupTable group) {
         for (Tuple tuple : msgQ) {
-            if (tuple.sender.equals(sender) && lc.equals(tuple.msg.getLc())){
+            if (tuple.sender.equals(txtMsg.getSender()) && txtMsg.getClock() == tuple.msg.getClock()){
                 tuple.group.remove(ackFrom);
                 return tuple.group.isEmpty();
             }
         }
-        throw new RuntimeException();
+        Tuple entry = insertMessage(txtMsg,group);
+        entry.group.remove(ackFrom);
+        return entry.group.isEmpty();
     }
     
 }

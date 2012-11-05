@@ -18,13 +18,12 @@ public class LogicalClock implements Serializable {
         return clock;
     }
 
-    public LogicalClock incrementClock() {
-        clock++;
-        return this;
+    public int incrementClock() {
+        return clock++;
     }
 
-    public void updateClock(LogicalClock msgClock) {
-        clock = Math.max(clock, msgClock.getClock()) + 1;
+    public void updateClock(int msgClock) {
+        clock = Math.max(clock, msgClock) + 1;
     }
 
     @Override
@@ -40,5 +39,12 @@ public class LogicalClock implements Serializable {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 97 * hash + this.clock;
+        return hash;
     }
 }

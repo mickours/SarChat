@@ -4,6 +4,8 @@
  */
 package sarchat.message;
 
+import sarchat.User;
+
 /**
  *
  * @author mickours
@@ -13,7 +15,8 @@ public class TextMessage extends MulticastMessage{
 
     private String message;
 
-    public TextMessage(String textTape) {
+    public TextMessage(String textTape, int clock, User sender ) {
+        super(clock, sender);
         message = textTape;
     }
     
@@ -23,7 +26,7 @@ public class TextMessage extends MulticastMessage{
 
     @Override
     public String toString() {
-        return " lc=" +getLc() + " message=" + message;
+        return " lc=" +getClock() + " message=" + message;
     }
     
     

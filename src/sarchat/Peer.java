@@ -65,7 +65,7 @@ public class Peer extends NIOSocketAgent {
             //Se connecter au serveur
             initConnection(server);
 
-            initDatagramChannel();
+            //initDatagramChannel();
         } catch (Exception ex) {
             log.log(Level.SEVERE, null, ex);
             assert false;
@@ -81,7 +81,7 @@ public class Peer extends NIOSocketAgent {
 
     //Initiate a connection with another user or the server
     private void initConnection(User connectMeWith) {
-        System.out.println("CONNEXION: " + me.name + " with " + connectMeWith.name);
+        System.out.println(me.name + "CONNEXION: " + me.name + " with " + connectMeWith.name);
         if (userSocketChannelMap.get(connectMeWith) == null) {
             try {
                 SocketChannel socketChannel = SocketChannel.open();
@@ -99,9 +99,9 @@ public class Peer extends NIOSocketAgent {
     /**
      * send the text message "msg" to the user specified in "sendTo"
      */
-    public void sendTextMessage(TextMessage msg) throws IOException {
+    public void sendTextMessage(String string) throws IOException {
+        TextMessage msg = new TextMessage(string, myClock.incrementClock(), me);
         for (User user : myGroup) {
-            msg.setLc(myClock.incrementClock());
             sendMessage(user, msg);
         }
     }
@@ -123,7 +123,7 @@ public class Peer extends NIOSocketAgent {
 
     public void messageReceived(User from, Message msg) {
         assert (msg != null);
-        System.out.println("Peer " + me.name + " received:\n\t" + msg);
+        System.out.println(me.name + " RECEIVED\t" + msg);
 
         if (msg instanceof UnicastMessage) {
             try {
@@ -167,7 +167,7 @@ public class Peer extends NIOSocketAgent {
         if (msg instanceof AckMessage) {
             joinTimer.cancel();
             connectToGroupMembers();
-            initHeartBeats();
+            //initHeartBeats();
             fireGroupIsReadyEvent();
         }
     }
@@ -176,22 +176,21 @@ public class Peer extends NIOSocketAgent {
         if (msg instanceof TextMessage) {
             TextMessage textMsg = (TextMessage) msg;
             //update clock and store msg in a queue
-            LogicalClock msgClock = textMsg.getLc();
+            int msgClock = textMsg.getClock();
             myClock.updateClock(msgClock);
-            msgQueue.insertMessage(textMsg, from, myGroup);
+            msgQueue.insertMessage(textMsg, myGroup);
             for (User u : myGroup) {
                 try {
-                    sendMessage(u, new AckMulticastMessage(textMsg, from));
+                    sendMessage(u, new AckMulticastMessage(textMsg, me));
                 } catch (IOException ex) {
                     log.log(Level.SEVERE, null, ex);
                 }
             }
         } else if (msg instanceof AckMulticastMessage) {
             AckMulticastMessage ack = (AckMulticastMessage) msg;
-            LogicalClock lc = ack.getMsgToAckLogicalClock();
-            if (msgQueue.ackReceived(from, ack.getSender(), lc)) {
+            if (msgQueue.ackReceived(from, ack.getTextMsg(), myGroup)) {
                 Tuple toDeliver = msgQueue.getHeadMessage();
-                log.log(Level.INFO, "{0}{1}", new Object[]{toDeliver.sender, toDeliver.toString()});
+                //log.log(Level.INFO, "{0}{1}", new Object[]{toDeliver.sender, toDeliver.toString()});
                 fireMessageDeliveredEvent(toDeliver.msg.getMessage(), toDeliver.sender);
             }
         } else {
@@ -210,7 +209,7 @@ public class Peer extends NIOSocketAgent {
     }
 
     private void fireMessageDeliveredEvent(String message, User sender) {
-        listener.messageDelivered(null, server);
+        listener.messageDelivered(message, sender);
     }
 
     @Override
@@ -218,11 +217,11 @@ public class Peer extends NIOSocketAgent {
         SocketChannel socketChannel = (SocketChannel) key.channel();
         socketChannel.finishConnect();
         socketChannel.register(selector, SelectionKey.OP_READ);
+        sendMessage(getUserFromSocket(socketChannel), new MulticastMessage(-1, me));
     }
 
     @Override
     protected void receivedAcceptable(SelectionKey key) throws IOException {
-        // accept connection
         SocketChannel client = serverSocket.accept();
         client.configureBlocking(false);
         client.socket().setTcpNoDelay(true);
@@ -236,17 +235,25 @@ public class Peer extends NIOSocketAgent {
             while (msgReceived == null) {
                 msgReceived = readMsg(key);
             }
-            messageReceived(getUserFromSocket((SocketChannel) key.channel()), msgReceived);
-        } else if (key.channel() instanceof DatagramChannel) {
-            System.out.println("Je reçois heartBeat");
-            HeartBeatMessage recu = null;
-            while (recu == null) {
-                recu = readHBM((DatagramChannel) key.channel());
+            if (msgReceived instanceof MulticastMessage) {
+                SocketChannel channel = (SocketChannel) key.channel();
+                User sender = ((MulticastMessage) msgReceived).getSender();
+                sender.ip = ((InetSocketAddress) channel.getRemoteAddress())
+                        .getAddress();
+                userSocketChannelMap.put(sender, channel);
             }
-            User sender = recu.getSender();
-            System.out.println("J'ai reçu un heartBeat");
-            prepareTimer(sender);
-        }
+            messageReceived(getUserFromSocket((SocketChannel) key.channel()), msgReceived);
+        } 
+//        else if (key.channel() instanceof DatagramChannel) {
+//            System.out.println("Je reçois heartBeat");
+//            HeartBeatMessage recu = null;
+//            while (recu == null) {
+//                recu = readHBM((DatagramChannel) key.channel());
+//            }
+//            User sender = recu.getSender();
+//            System.out.println("J'ai reçu un heartBeat");
+//            prepareTimer(sender);
+//        }
     }
 
     //TODO : A revoiir completement ??
@@ -255,6 +262,7 @@ public class Peer extends NIOSocketAgent {
         socket.receive(dataByteBufferUDP);
         
         //TODO : Verifier qu'on a reçu au moins 4...
+        
         int tailleMsg = dataByteBufferUDP.getInt(0);
         //TODO : verifier qu'on a reçu taille  + 4...
         ByteArrayInputStream bais = new ByteArrayInputStream(dataByteBufferUDP.array());
@@ -277,7 +285,7 @@ public class Peer extends NIOSocketAgent {
                     oos.close();
                     final ByteBuffer wrap = ByteBuffer.wrap(baos.toByteArray());
                     wrap.putInt(0, baos.size() - 4);
-                    dataChan.send(wrap, new InetSocketAddress(user.ip, user.port+1));
+                    dataChan.send(wrap, new InetSocketAddress(user.ip, user.port + 1));
                 } catch (IOException ex) {
                     Logger.getLogger(Peer.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -309,6 +317,14 @@ public class Peer extends NIOSocketAgent {
             }
         }), heartBeatTimeout);
     }
+    
+    public String getMyName(){
+        return me.name;
+    }
+    
+    public GroupTable getMyGroup(){
+        return myGroup;
+    }
 
     private void initMapUserTimer() {
         mapUserTimer = new HashMap<>();
@@ -320,7 +336,7 @@ public class Peer extends NIOSocketAgent {
     private void initDatagramChannel() throws IOException {
         dataChan = DatagramChannel.open();
         dataChan.socket().setReuseAddress(true);
-        dataChan.socket().bind(new InetSocketAddress(me.port+1));
+        dataChan.socket().bind(new InetSocketAddress(me.port + 1));
         dataChan.configureBlocking(false);
         dataChan.register(selector, SelectionKey.OP_READ);
     }

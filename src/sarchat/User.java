@@ -52,13 +52,7 @@ public class User implements Serializable{
             return false;
         }
         final User other = (User) obj;
-        if (!Objects.equals(this.name, other.name)) {
-            return false;
-        }
-        if (!Objects.equals(this.ip, other.ip)) {
-            return false;
-        }
-        if (this.port != other.port) {
+        if (!this.name.equals(other.name)) {
             return false;
         }
         return true;
