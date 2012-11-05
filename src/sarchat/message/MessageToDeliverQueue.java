@@ -23,7 +23,7 @@ public class MessageToDeliverQueue {
     
     public Tuple insertMessage(TextMessage msg,GroupTable group){
         for (Tuple tuple : msgQ) {
-            if (tuple.msg.equals(msg)){
+            if (tuple.msg.getClock() == msg.getClock() && tuple.msg.getSender().equals(msg.getSender())){
                 return tuple;
             }
         }

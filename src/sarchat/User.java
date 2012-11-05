@@ -52,7 +52,7 @@ public class User implements Serializable{
             return false;
         }
         final User other = (User) obj;
-        if (!Objects.equals(this.name, other.name)) {
+        if (!this.name.equals(other.name)) {
             return false;
         }
         return true;
