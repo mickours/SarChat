@@ -51,6 +51,7 @@ public abstract class NIOSocketAgent {
         serverSocket = null;
         try {
             serverSocket = ServerSocketChannel.open();
+            serverSocket.socket().setReuseAddress(true);
             serverSocket.socket().bind(new InetSocketAddress(port));
             serverSocket.configureBlocking(false);
             serverSocket.register(selector, SelectionKey.OP_ACCEPT);

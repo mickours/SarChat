@@ -64,4 +64,14 @@ public class GroupTable extends HashSet<User> {
         return underMeList;
     }
     
+    List<User> getAllOtherThanMe(User me){
+        List<User> otherThanMeList = new LinkedList();
+        for (User user : this) {
+            if (!user.name.equals(me)){
+                otherThanMeList.add(user);
+            }
+        }
+        return otherThanMeList;
+    }
+    
 }
