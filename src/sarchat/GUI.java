@@ -162,7 +162,7 @@ public class GUI extends javax.swing.JFrame implements PeerEventListener {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, personAvailablePanelLayout.createSequentialGroup()
                 .addComponent(TitleBoxGroup)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 355, Short.MAX_VALUE))
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 363, Short.MAX_VALUE))
         );
 
         NameLabel.setText("Name");
@@ -369,12 +369,11 @@ public class GUI extends javax.swing.JFrame implements PeerEventListener {
     }//GEN-LAST:event_sendMessageTextAreaKeyPressed
 
     private void BurstToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BurstToggleButtonActionPerformed
-       if (peer.isInBurst()){
-           peer.stopBurst();
-       }
-       else{
-           peer.startBurst();
-       }
+        try {
+            peer.sendBurstMessage();
+        } catch (IOException ex) {
+            Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_BurstToggleButtonActionPerformed
 
     private void BurstToggleButtonItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_BurstToggleButtonItemStateChanged
@@ -458,7 +457,14 @@ public class GUI extends javax.swing.JFrame implements PeerEventListener {
     }
 
     @Override
-    public void burstStopAnotherUser() {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void burst() {
+       if (peer.isInBurst()){
+           peer.stopBurst();
+           BurstToggleButton.setText("Burst");
+       }
+       else{
+           peer.startBurst();
+           BurstToggleButton.setText("Stop Burst");
+       }
     }
 }

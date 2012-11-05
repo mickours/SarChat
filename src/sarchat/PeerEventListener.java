@@ -8,5 +8,5 @@ public interface PeerEventListener extends EventListener{
     public void messageDelivered(String message, User sender);
     public void peerDown(User user);
     public void peerUp(User user);
-    public void burstStopAnotherUser();
+    public void burst();
 }

@@ -19,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import sarchat.message.AckMessage;
 import sarchat.message.AckMulticastMessage;
+import sarchat.message.BurstMessage;
 import sarchat.message.HeartBeatMessage;
 import sarchat.message.JoinMessage;
 import sarchat.message.LogicalClock;
@@ -80,7 +81,7 @@ public class Peer extends NIOSocketAgent {
 
     //Initiate a connection with another user or the server
     private void initConnection(User connectMeWith) {
-        System.out.println(me.name + "CONNEXION: " + me.name + " with " + connectMeWith.name);
+//        System.out.println(me.name + "CONNEXION: " + me.name + " with " + connectMeWith.name);
         if (userSocketChannelMap.get(connectMeWith) == null) {
             try {
                 SocketChannel socketChannel = SocketChannel.open();
@@ -120,6 +121,13 @@ public class Peer extends NIOSocketAgent {
         }, serverTimout);
     }
 
+    void sendBurstMessage() throws IOException {
+        BurstMessage msg = new BurstMessage(myClock.incrementClock(), me);
+        for (User user : myGroup) {
+            sendMessage(user, msg);
+        }
+    }
+
     public boolean isInBurst() {
         return inBurst;
     }
@@ -127,6 +135,7 @@ public class Peer extends NIOSocketAgent {
     public void startBurst() {
         inBurst = true;
         doBurst();
+        System.out.println("BURST START");
     }
 
     public void stopBurst() {
@@ -148,13 +157,14 @@ public class Peer extends NIOSocketAgent {
                         Logger.getLogger(Peer.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
+                System.out.println("BURST STOP");
             }
         }).start();
     }
 
     public void messageReceived(User from, Message msg) {
         assert (msg != null);
-        System.out.println(me.name + " RECEIVED\t" + msg);
+      //  System.out.println(me.name + " RECEIVED\t" + msg);
 
         if (msg instanceof UnicastMessage) {
             try {
@@ -164,8 +174,6 @@ public class Peer extends NIOSocketAgent {
             }
         } else if (msg instanceof MulticastMessage) {
             handleChatMessage(from, msg);
-        } else {
-            assert false;
         }
     }
 
@@ -204,27 +212,36 @@ public class Peer extends NIOSocketAgent {
     }
 
     private void handleChatMessage(User from, Message msg) {
-        if (msg instanceof TextMessage) {
-            TextMessage textMsg = (TextMessage) msg;
-            //update clock and store msg in a queue
-            int msgClock = textMsg.getClock();
-            myClock.updateClock(msgClock);
-            msgQueue.insertMessage(textMsg, myGroup);
-            for (User u : myGroup) {
-                try {
-                    sendMessage(u, new AckMulticastMessage(textMsg, me));
-                } catch (IOException ex) {
-                    log.log(Level.SEVERE, null, ex);
-                }
-            }
-        } else if (msg instanceof AckMulticastMessage) {
+        if (msg instanceof AckMulticastMessage) {
             AckMulticastMessage ack = (AckMulticastMessage) msg;
-            if (msgQueue.ackReceived(from, ack.getTextMsg(), myGroup)) {
+            if (msgQueue.ackReceived(from, ack.getMulticastMsg(), myGroup)) {
                 Tuple toDeliver;
                 while ((toDeliver = msgQueue.getToDeliverMessage()) != null) {
-                    fireMessageDeliveredEvent(toDeliver.msg.getMessage(), toDeliver.msg.getSender());
-                    System.out.println("DELIVER " + toDeliver.msg);
+                    if (toDeliver.msg instanceof TextMessage) {
+                        fireMessageDeliveredEvent(((TextMessage) toDeliver.msg).getMessage(), toDeliver.msg.getSender());
+                    }
+                    else if (toDeliver.msg instanceof BurstMessage){
+                        fireBurstMessageEvent();
+                    }
+//                    System.out.println("DELIVER " + toDeliver.msg);
                     //log.log(Level.INFO, "{0}{1}", new Object[]{toDeliver.sender, toDeliver.toString()});
+                }
+            }
+        }
+        else if (msg instanceof MulticastMessage) {
+            MulticastMessage mcMsg = (MulticastMessage) msg;
+            //update clock and store msg in a queue
+            int msgClock = mcMsg.getClock();
+            if (msgClock < 0){
+                return;
+            }
+            myClock.updateClock(msgClock);
+            msgQueue.insertMessage(mcMsg, myGroup);
+            for (User u : myGroup) {
+                try {
+                    sendMessage(u, new AckMulticastMessage(mcMsg, me));
+                } catch (IOException ex) {
+                    log.log(Level.SEVERE, null, ex);
                 }
             }
         }
@@ -242,6 +259,10 @@ public class Peer extends NIOSocketAgent {
 
     private void fireMessageDeliveredEvent(String message, User sender) {
         listener.messageDelivered(message, sender);
+    }
+
+    private void fireBurstMessageEvent(){
+        listener.burst();
     }
 
     @Override
@@ -267,14 +288,14 @@ public class Peer extends NIOSocketAgent {
         while (msgReceived == null) {
             msgReceived = readMsg(key);
         }
-
+        SocketChannel channel = (SocketChannel) key.channel();
         if (msgReceived instanceof MulticastMessage) {
-            SocketChannel channel = (SocketChannel) key.channel();
             User sender = ((MulticastMessage) msgReceived).getSender();
             sender.ip = ((InetSocketAddress) channel.getRemoteAddress())
                     .getAddress();
             userSocketChannelMap.put(sender, channel);
         }
+        messageReceived(getUserFromSocket(channel), msgReceived);
     }
 
     //TODO : A revoiir completement ??

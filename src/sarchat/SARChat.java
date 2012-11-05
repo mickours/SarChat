@@ -115,7 +115,7 @@ public class SARChat implements PeerEventListener {
     }
 
     @Override
-    public void burstStopAnotherUser() {
+    public void burst() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

@@ -9,7 +9,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -32,7 +31,7 @@ public abstract class NIOSocketAgent {
     protected HashMap<User, SocketChannel> userSocketChannelMap;
     protected Selector selector;
     protected ServerSocketChannel serverSocket;
-    
+
     private final ByteBuffer lengthByteBuffer = ByteBuffer.wrap(new byte[4]);
     private ByteBuffer dataByteBuffer = null;
     private boolean readLength = true;
@@ -46,7 +45,7 @@ public abstract class NIOSocketAgent {
             Logger.getLogger(NIOSocketAgent.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     public void createServerSocket(int port) throws IOException {
         serverSocket = null;
         try {
@@ -73,14 +72,13 @@ public abstract class NIOSocketAgent {
             }
         } catch (Throwable e) {
             e.printStackTrace();
-            System.out.println("Error : "+e.toString());
             throw new RuntimeException("Socket failure: " + e.getMessage());
         } finally {
             try {
                 selector.close();
                 serverSocket.socket().close();
                 serverSocket.close();
-                //stopped();
+                System.exit(0);
             } catch (Exception e) {
                 // do nothing - server failed
             }
@@ -100,12 +98,21 @@ public abstract class NIOSocketAgent {
         } else {
             socket.read(dataByteBuffer);
             if (dataByteBuffer.remaining() == 0) {
-                ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(dataByteBuffer.array()));
-                final Message ret = (Message) ois.readObject();
-                // clean up
-                dataByteBuffer = null;
-                readLength = true;
-                return ret;
+                Message ret = null;
+                ByteArrayInputStream bais = new ByteArrayInputStream(dataByteBuffer.array());
+                ObjectInputStream ois = new ObjectInputStream(bais);
+                try{
+                    ret = (Message) ois.readObject();
+                }catch(IOException e){
+                    //Nothing for now ...
+                }finally{
+                    // clean up
+                    bais.close();
+                    ois.close();
+                    dataByteBuffer = null;
+                    readLength = true;
+                    return ret;
+                }
             }
         }
         return null;
@@ -118,19 +125,17 @@ public abstract class NIOSocketAgent {
             for (int i = 0; i < 4; i++) {
                 baos.write(0);
             }
-            ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(msg);
-            oos.close();
+            try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+                oos.writeObject(msg);
+            }
             final ByteBuffer wrap = ByteBuffer.wrap(baos.toByteArray());
             wrap.putInt(0, baos.size() - 4);
 
             socketWhereToSend.write(wrap);
-            System.out.println("SEND TO "+sendTo.name+"\t" + msg);
+//            System.out.println("SEND TO "+sendTo.name+"\t" + msg);
         }
-        assert(socketWhereToSend != null);
-        assert(socketWhereToSend.isConnected());
     }
-    
+
     protected User getUserFromSocket(SocketChannel socketFrom){
         for (User user : userSocketChannelMap.keySet()){
             SocketChannel sock = userSocketChannelMap.get(user);
@@ -140,10 +145,10 @@ public abstract class NIOSocketAgent {
         }
         return null;
     }
-    
+
 
     protected abstract void receivedConnectable(SelectionKey key)throws IOException;
     protected abstract void receivedAcceptable(SelectionKey key)throws IOException;
     protected abstract void receivedReadable(SelectionKey key)throws Exception;
-       
+
 }

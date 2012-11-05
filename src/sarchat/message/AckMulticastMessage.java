@@ -11,15 +11,15 @@ import sarchat.User;
  * @author mickours
  */
 public class AckMulticastMessage extends MulticastMessage{
-    private TextMessage textMsg;
+    private MulticastMessage textMsg;
 
-    public AckMulticastMessage(TextMessage textMsg, User sender ) {
+    public AckMulticastMessage(MulticastMessage textMsg, User sender ) {
         super(-1, sender);
         this.textMsg = textMsg;
 
     }
 
-    public TextMessage getTextMsg() {
+    public MulticastMessage getMulticastMsg() {
         return textMsg;
     }
 

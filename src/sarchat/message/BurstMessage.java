@@ -4,10 +4,16 @@
  */
 package sarchat.message;
 
+import sarchat.User;
+
 /**
  *
  * @author Michael Mercier <michael_mercier@orange.fr>
  */
-public class BurstMessage {
+public class BurstMessage extends MulticastMessage{
 
+    public BurstMessage(int clock, User sender) {
+        super(clock, sender);
+    }
+    
 }

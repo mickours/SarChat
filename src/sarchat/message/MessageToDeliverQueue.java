@@ -8,10 +8,10 @@ public class MessageToDeliverQueue {
 
 
     public class Tuple{
-       public TextMessage msg;
+       public MulticastMessage msg;
        public GroupTable group;
 
-        public Tuple(TextMessage msg, User sender,GroupTable group) {
+        public Tuple(MulticastMessage msg, User sender,GroupTable group) {
             this.msg = msg;
             this.group = new GroupTable(group);
         }
@@ -19,14 +19,17 @@ public class MessageToDeliverQueue {
 
     LinkedList<Tuple> msgQ = new LinkedList<>();
 
-    public Tuple insertMessage(TextMessage msg,GroupTable group){
+    public Tuple insertMessage(MulticastMessage msg,GroupTable group){
         for (Tuple tuple : msgQ) {
             if (tuple.msg.getClock() == msg.getClock() && tuple.msg.getSender().equals(msg.getSender())){
                 return tuple;
             }
         }
         int ind=0;
-        while (msgQ.size() > ind && msgQ.get(ind).msg.getClock() <= msg.getClock() ){
+        while (msgQ.size() > ind
+                && (msgQ.get(ind).msg.getClock() < msg.getClock()
+                    || (msgQ.get(ind).msg.getClock() == msg.getClock()
+                        && msgQ.get(ind).msg.getSender().name.compareTo(msg.getSender().name)>0) ) ){
             ind++;
         }
         msgQ.add(ind, new Tuple(msg,msg.getSender(),group));
@@ -40,7 +43,7 @@ public class MessageToDeliverQueue {
         return null;
     }
 
-    public boolean ackReceived(User ackFrom, TextMessage txtMsg, GroupTable group) {
+    public boolean ackReceived(User ackFrom, MulticastMessage txtMsg, GroupTable group) {
         for (Tuple tuple : msgQ) {
             if (tuple.msg.getSender().equals(txtMsg.getSender()) && txtMsg.getClock() == tuple.msg.getClock()){
                 tuple.group.remove(ackFrom);
