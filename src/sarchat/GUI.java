@@ -4,15 +4,12 @@
  */
 package sarchat;
 
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
-import sarchat.message.TextMessage;
 
 /**
  *
@@ -33,7 +30,7 @@ public class GUI extends javax.swing.JFrame implements PeerEventListener {
             model.addElement(user.name);
         }
         NameLabel.setText(peer.getMyName());
-        chatMessageTextArea.setEditable(false);
+       // chatMessageTextArea.setEditable(false);
         chatMessageTextArea.setText("Connecting...\n");
         sendMessageTextArea.setEnabled(false);
     }
@@ -165,7 +162,7 @@ public class GUI extends javax.swing.JFrame implements PeerEventListener {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, personAvailablePanelLayout.createSequentialGroup()
                 .addComponent(TitleBoxGroup)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE))
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 355, Short.MAX_VALUE))
         );
 
         NameLabel.setText("Name");
@@ -195,9 +192,7 @@ public class GUI extends javax.swing.JFrame implements PeerEventListener {
         containersDialog.setBackground(java.awt.Color.white);
         containersDialog.setForeground(java.awt.Color.white);
 
-        chatMessageTextArea.setColumns(20);
-        chatMessageTextArea.setRows(5);
-        chatMessageTextArea.setPreferredSize(new java.awt.Dimension(150, 105));
+        chatMessageTextArea.setEditable(false);
         chatMessageScrollPane.setViewportView(chatMessageTextArea);
 
         javax.swing.GroupLayout containersDialogLayout = new javax.swing.GroupLayout(containersDialog);
@@ -374,15 +369,18 @@ public class GUI extends javax.swing.JFrame implements PeerEventListener {
     }//GEN-LAST:event_sendMessageTextAreaKeyPressed
 
     private void BurstToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BurstToggleButtonActionPerformed
-        // TODO add your handling code here:
+       if (peer.isInBurst()){
+           peer.stopBurst();
+       }
+       else{
+           peer.startBurst();
+       }
     }//GEN-LAST:event_BurstToggleButtonActionPerformed
 
     private void BurstToggleButtonItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_BurstToggleButtonItemStateChanged
         if (evt.getStateChange() == ItemEvent.SELECTED) {
-            System.out.println("button is selected");
             BurstToggleButton.setText("Stop Burst");
         } else if (evt.getStateChange() == ItemEvent.DESELECTED) {
-            System.out.println("button is not selected");
             BurstToggleButton.setText("Burst");
         }
     }//GEN-LAST:event_BurstToggleButtonItemStateChanged

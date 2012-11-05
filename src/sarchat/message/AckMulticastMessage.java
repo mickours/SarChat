@@ -12,11 +12,11 @@ import sarchat.User;
  */
 public class AckMulticastMessage extends MulticastMessage{
     private TextMessage textMsg;
-    
+
     public AckMulticastMessage(TextMessage textMsg, User sender ) {
         super(-1, sender);
         this.textMsg = textMsg;
-        
+
     }
 
     public TextMessage getTextMsg() {
@@ -25,7 +25,7 @@ public class AckMulticastMessage extends MulticastMessage{
 
     @Override
     public String toString() {
-        return "AckMulticastMessage{" + "textMsg=" + textMsg + '}';
+        return "AckMulticastMessage{" + "textMsg=" + textMsg + "} from " +getSender();
     }
 
 }

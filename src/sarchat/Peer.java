@@ -33,6 +33,7 @@ public class Peer extends NIOSocketAgent {
     Timer joinTimer = new Timer(true);
     final long serverTimout = 10000;//10s
     private PeerEventListener listener;
+    private boolean inBurst;
 
     public Peer(String myName, final List<String> groupToJoin) {
         super();
@@ -47,7 +48,7 @@ public class Peer extends NIOSocketAgent {
 
             server = new User("server", InetAddress.getLocalHost(), Server.serverPort);
             //Se connecter au serveur
-            initConnection(server); 
+            initConnection(server);
         } catch (Exception ex) {
             log.log(Level.SEVERE, null, ex);
             assert false;
@@ -56,14 +57,14 @@ public class Peer extends NIOSocketAgent {
         msgQueue = new MessageToDeliverQueue();
         myClock = new LogicalClock();
     }
-    
-    public void createListenSocket() throws IOException{
+
+    public void createListenSocket() throws IOException {
         createServerSocket(me.port);
     }
 
     //Initiate a connection with another user or the server
     private void initConnection(User connectMeWith) {
-        System.out.println(me.name+"CONNEXION: "+me.name+" with "+connectMeWith.name);
+        System.out.println(me.name + "CONNEXION: " + me.name + " with " + connectMeWith.name);
         if (userSocketChannelMap.get(connectMeWith) == null) {
             try {
                 SocketChannel socketChannel = SocketChannel.open();
@@ -103,9 +104,41 @@ public class Peer extends NIOSocketAgent {
         }, serverTimout);
     }
 
+    public boolean isInBurst() {
+        return inBurst;
+    }
+
+    public void startBurst(){
+        inBurst = true;
+        doBurst();
+    }
+
+    public void stopBurst(){
+        inBurst = false;
+    }
+
+    private void doBurst() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int var = 0;
+                while (inBurst) {
+                    try {
+                        sendTextMessage(Integer.toString(var++));
+                        Thread.sleep(10);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(Peer.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (IOException ex) {
+                        Logger.getLogger(Peer.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        }).start();
+    }
+
     public void messageReceived(User from, Message msg) {
         assert (msg != null);
-        System.out.println(me.name+" RECEIVED\t" + msg);
+        System.out.println(me.name + " RECEIVED\t" + msg);
 
         if (msg instanceof UnicastMessage) {
             try {
@@ -126,12 +159,12 @@ public class Peer extends NIOSocketAgent {
             joinTimer.cancel();
             joinTimer = null;
             joinTimer = new Timer(true);
-            
+
             JoinMessage joinMsg = (JoinMessage) msg;
             myGroup = joinMsg.getGroup();
-            
+
             sendMessage(server, new AckMessage());
-            
+
             //set timout
             joinTimer.schedule(new TimerTask() {
                 @Override
@@ -144,7 +177,7 @@ public class Peer extends NIOSocketAgent {
                 }
             }, serverTimout);
         }
-        
+
         //ACK
         if (msg instanceof AckMessage) {
             joinTimer.cancel();
@@ -169,26 +202,27 @@ public class Peer extends NIOSocketAgent {
             }
         } else if (msg instanceof AckMulticastMessage) {
             AckMulticastMessage ack = (AckMulticastMessage) msg;
-            if (msgQueue.ackReceived(from, ack.getTextMsg(),myGroup)) {
-                Tuple toDeliver = msgQueue.getHeadMessage();
-                //log.log(Level.INFO, "{0}{1}", new Object[]{toDeliver.sender, toDeliver.toString()});
-                fireMessageDeliveredEvent(toDeliver.msg.getMessage(), toDeliver.sender);
+            if (msgQueue.ackReceived(from, ack.getTextMsg(), myGroup)) {
+                Tuple toDeliver;
+                while((toDeliver = msgQueue.getToDeliverMessage()) != null){
+                    fireMessageDeliveredEvent(toDeliver.msg.getMessage(), toDeliver.msg.getSender());
+                    System.out.println("DELIVER "+toDeliver.msg);
+                    //log.log(Level.INFO, "{0}{1}", new Object[]{toDeliver.sender, toDeliver.toString()});
+                }
             }
-        } else {
-            assert false;
         }
     }
-    
-    public void setListener(PeerEventListener listener){
+
+    public void setListener(PeerEventListener listener) {
         this.listener = listener;
     }
-    
-    private void fireGroupIsReadyEvent(){
-        if (listener != null){
+
+    private void fireGroupIsReadyEvent() {
+        if (listener != null) {
             listener.groupIsReady(myGroup);
         }
     }
-    
+
     private void fireMessageDeliveredEvent(String message, User sender) {
         listener.messageDelivered(message, sender);
     }
@@ -206,22 +240,22 @@ public class Peer extends NIOSocketAgent {
         SocketChannel client = serverSocket.accept();
         client.configureBlocking(false);
         client.socket().setTcpNoDelay(true);
-        client.register(selector, SelectionKey.OP_READ);     
+        client.register(selector, SelectionKey.OP_READ);
     }
 
     @Override
     protected void receivedReadable(SelectionKey key) throws Exception {
         Message msgReceived = null;
-        
+
         while (msgReceived == null) {
             msgReceived = readMsg(key);
         }
-        
+
         if (msgReceived instanceof MulticastMessage) {
-            SocketChannel channel = (SocketChannel)key.channel();
-            User sender = ((MulticastMessage)msgReceived).getSender();
+            SocketChannel channel = (SocketChannel) key.channel();
+            User sender = ((MulticastMessage) msgReceived).getSender();
             sender.ip = ((InetSocketAddress) channel.getRemoteAddress())
-                .getAddress();
+                    .getAddress();
             userSocketChannelMap.put(sender, channel);
         }
         messageReceived(getUserFromSocket((SocketChannel) key.channel()), msgReceived);
