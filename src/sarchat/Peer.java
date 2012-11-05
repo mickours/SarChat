@@ -237,4 +237,8 @@ public class Peer extends NIOSocketAgent {
     String getMyName() {
         return me.name;
     }
+
+    GroupTable getMyGroup() {
+        return myGroup;
+    }
 }
