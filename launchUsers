@@ -1,0 +1,16 @@
+#!/bin/bash
+
+dir="./dist/"
+exec="SARChat.jar"
+java="java -jar"
+
+group="A;B;C"
+user[1]="A"
+user[2]="B"
+user[3]="C"
+
+for i in {1..3}
+do
+    $java $dir$exec ${user[i]} $group &
+done
+

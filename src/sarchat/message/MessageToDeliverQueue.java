@@ -47,10 +47,10 @@ public class MessageToDeliverQueue {
         for (Tuple tuple : msgQ) {
             if (tuple.msg.getSender().equals(txtMsg.getSender()) && txtMsg.getClock() == tuple.msg.getClock()){
                 tuple.group.remove(ackFrom);
-                return tuple.group.isEmpty() && msgQ.getFirst() == tuple;
+                return tuple.group.isEmpty();
             }
         }
-        System.out.println("ACK FIRST for "+txtMsg+" from "+ackFrom );
+//        System.out.println("ACK FIRST for "+txtMsg+" from "+ackFrom );
         Tuple entry = insertMessage(txtMsg,group);
         entry.group.remove(ackFrom);
         return entry.group.isEmpty();

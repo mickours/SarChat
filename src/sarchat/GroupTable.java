@@ -4,9 +4,7 @@
  */
 package sarchat;
 
-import java.net.InetAddress;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -26,11 +24,11 @@ public class GroupTable extends HashSet<User> {
     GroupTable() {
         super();
     }
-    
+
     public User getUser(String name){
         for (User user : this){
             if(user.name.equals(name)){
-                return user;                
+                return user;
             }
         }
         return null;
@@ -51,7 +49,7 @@ public class GroupTable extends HashSet<User> {
                 groupComplete = false;
             }
         }
-        return groupComplete; 
+        return groupComplete;
     }
 
     List<User> getUserToConnectWith(User me) {
@@ -63,15 +61,15 @@ public class GroupTable extends HashSet<User> {
         }
         return underMeList;
     }
-    
-    List<User> getAllOtherThanMe(User me){
-        List<User> otherThanMeList = new LinkedList();
-        for (User user : this) {
-            if (!user.name.equals(me)){
-                otherThanMeList.add(user);
-            }
-        }
-        return otherThanMeList;
-    }
-    
+
+//    List<User> getAllOtherThanMe(User me){
+//        List<User> otherThanMeList = new LinkedList();
+//        for (User user : this) {
+//            if (!user.name.equals(me)){
+//                otherThanMeList.add(user);
+//            }
+//        }
+//        return otherThanMeList;
+//    }
+
 }
