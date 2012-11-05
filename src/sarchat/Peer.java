@@ -63,7 +63,7 @@ public class Peer extends NIOSocketAgent {
 
     //Initiate a connection with another user or the server
     private void initConnection(User connectMeWith) {
-        System.out.println("CONNEXION: "+me.name+" with "+connectMeWith.name);
+        System.out.println(me.name+"CONNEXION: "+me.name+" with "+connectMeWith.name);
         if (userSocketChannelMap.get(connectMeWith) == null) {
             try {
                 SocketChannel socketChannel = SocketChannel.open();
@@ -105,7 +105,7 @@ public class Peer extends NIOSocketAgent {
 
     public void messageReceived(User from, Message msg) {
         assert (msg != null);
-        System.out.println("Peer " + me.name + " received:\n\t" + msg);
+        System.out.println(me.name+" RECEIVED\t" + msg);
 
         if (msg instanceof UnicastMessage) {
             try {
@@ -159,7 +159,7 @@ public class Peer extends NIOSocketAgent {
             //update clock and store msg in a queue
             int msgClock = textMsg.getClock();
             myClock.updateClock(msgClock);
-            msgQueue.insertMessage(textMsg, from, myGroup);
+            msgQueue.insertMessage(textMsg, myGroup);
             for (User u : myGroup) {
                 try {
                     sendMessage(u, new AckMulticastMessage(textMsg, me));
@@ -169,9 +169,9 @@ public class Peer extends NIOSocketAgent {
             }
         } else if (msg instanceof AckMulticastMessage) {
             AckMulticastMessage ack = (AckMulticastMessage) msg;
-            if (msgQueue.ackReceived(from, ack.getTextMsg().getSender(), ack.getTextMsg().getClock())) {
+            if (msgQueue.ackReceived(from, ack.getTextMsg(),myGroup)) {
                 Tuple toDeliver = msgQueue.getHeadMessage();
-                log.log(Level.INFO, "{0}{1}", new Object[]{toDeliver.sender, toDeliver.toString()});
+                //log.log(Level.INFO, "{0}{1}", new Object[]{toDeliver.sender, toDeliver.toString()});
                 fireMessageDeliveredEvent(toDeliver.msg.getMessage(), toDeliver.sender);
             }
         } else {
@@ -232,5 +232,9 @@ public class Peer extends NIOSocketAgent {
         for (User user : toConnectWith) {
             initConnection(user);
         }
+    }
+
+    String getMyName() {
+        return me.name;
     }
 }

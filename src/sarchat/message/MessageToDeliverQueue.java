@@ -15,33 +15,40 @@ public class MessageToDeliverQueue {
         public Tuple(TextMessage msg, User sender,GroupTable group) {
             this.sender = sender;
             this.msg = msg;
-            this.group = group;
+            this.group = new GroupTable(group);
         }
     }
     
     LinkedList<Tuple> msgQ = new LinkedList<>();
     
-    public void insertMessage(TextMessage msg,User from,GroupTable group){
+    public Tuple insertMessage(TextMessage msg,GroupTable group){
+        for (Tuple tuple : msgQ) {
+            if (tuple.msg.equals(msg)){
+                return tuple;
+            }
+        }
         int ind=0;
-        while (msgQ.size() > ind && msgQ.get(ind).msg != null 
-                && msgQ.get(ind).msg.getClock() < msg.getClock() ){
+        while (msgQ.size() > ind && msgQ.get(ind).msg.getClock() <= msg.getClock() ){
             ind++;
         }
-        msgQ.add(ind, new Tuple(msg,from,group));
+        msgQ.add(ind, new Tuple(msg,msg.getSender(),group));
+        return msgQ.get(ind);
     }
     
     public Tuple getHeadMessage(){
         return msgQ.pop();
     }
     
-    public boolean ackReceived(User ackFrom, User sender, int lc) {
+    public boolean ackReceived(User ackFrom, TextMessage txtMsg, GroupTable group) {
         for (Tuple tuple : msgQ) {
-            if (tuple.sender.equals(sender) && lc == tuple.msg.getClock()){
+            if (tuple.sender.equals(txtMsg.getSender()) && txtMsg.getClock() == tuple.msg.getClock()){
                 tuple.group.remove(ackFrom);
                 return tuple.group.isEmpty();
             }
         }
-        throw new RuntimeException("the ack from "+ackFrom+" for the message "+lc+":"+sender+" failed");
+        Tuple entry = insertMessage(txtMsg,group);
+        entry.group.remove(ackFrom);
+        return entry.group.isEmpty();
     }
     
 }

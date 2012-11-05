@@ -32,7 +32,7 @@ public class Server extends NIOSocketAgent {
         assert (msg instanceof UnicastMessage);
 
 
-        System.out.println("Server received:\n\t" + msg);
+        System.out.println("RECEIVED \t" + msg);
         //JOIN Received
         if (msg instanceof JoinMessage) {
             JoinMessage joinMsg = (JoinMessage) msg;

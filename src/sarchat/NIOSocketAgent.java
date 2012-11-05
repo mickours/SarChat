@@ -55,7 +55,7 @@ public abstract class NIOSocketAgent {
             serverSocket.configureBlocking(false);
             serverSocket.register(selector, SelectionKey.OP_ACCEPT);
             while (true) {
-                selector.select();
+                selector.select(5);
                 for (Iterator<SelectionKey> i = selector.selectedKeys().iterator(); i.hasNext();) {
                     SelectionKey key = i.next();
                     i.remove();
@@ -124,7 +124,7 @@ public abstract class NIOSocketAgent {
             wrap.putInt(0, baos.size() - 4);
 
             socketWhereToSend.write(wrap);
-            System.out.println("send to "+sendTo+":\n\t" + msg);
+            System.out.println("SEND TO "+sendTo.name+"\t" + msg);
         }
         assert(socketWhereToSend != null);
         assert(socketWhereToSend.isConnected());

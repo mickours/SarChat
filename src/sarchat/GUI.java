@@ -4,9 +4,14 @@
  */
 package sarchat;
 
+import java.awt.event.ItemEvent;
+import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.DefaultListModel;
+import javax.swing.JLabel;
+import sarchat.message.TextMessage;
 
 /**
  *
@@ -33,24 +38,24 @@ public class GUI extends javax.swing.JFrame implements PeerEventListener{
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jDialog1 = new javax.swing.JDialog();
+        JoinDialog = new javax.swing.JDialog();
         jPanel1 = new javax.swing.JPanel();
-        NewLabel = new javax.swing.JLabel();
         AddLabel = new javax.swing.JLabel();
         JoinButton = new javax.swing.JButton();
-        CreateButton = new javax.swing.JButton();
+        jTextField1 = new javax.swing.JTextField();
         containersGroup = new javax.swing.JPanel();
-        TitleBoxGroup = new javax.swing.JLabel();
         personAvailablePanel = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
         groupList = new javax.swing.JList();
+        TitleBoxGroup = new javax.swing.JLabel();
+        NameLabel = new javax.swing.JLabel();
         containersDialog = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         chatMessageTextArea = new javax.swing.JTextArea();
         containersWrite = new javax.swing.JPanel();
         SendButton = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        sendMessageTextArea = new javax.swing.JTextArea();
+        BurstToggleButton = new javax.swing.JToggleButton();
+        sendMessageTextArea = new javax.swing.JTextField();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         openMenuItem = new javax.swing.JMenuItem();
@@ -66,9 +71,7 @@ public class GUI extends javax.swing.JFrame implements PeerEventListener{
         contentsMenuItem = new javax.swing.JMenuItem();
         aboutMenuItem = new javax.swing.JMenuItem();
 
-        NewLabel.setText("Créer un groupe : ");
-
-        AddLabel.setText("S'ajouter dans un groupe : ");
+        AddLabel.setText("Créer un groupe : ");
 
         JoinButton.setText("Join a group");
         JoinButton.addActionListener(new java.awt.event.ActionListener() {
@@ -77,10 +80,10 @@ public class GUI extends javax.swing.JFrame implements PeerEventListener{
             }
         });
 
-        CreateButton.setText("Create List of person");
-        CreateButton.addActionListener(new java.awt.event.ActionListener() {
+        jTextField1.setText("Put group's name and user's name");
+        jTextField1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                CreateButtonActionPerformed(evt);
+                jTextField1ActionPerformed(evt);
             }
         });
 
@@ -89,70 +92,74 @@ public class GUI extends javax.swing.JFrame implements PeerEventListener{
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(AddLabel)
-                    .addComponent(NewLabel))
-                .addGap(59, 59, 59)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(CreateButton)
-                    .addComponent(JoinButton))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(AddLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 261, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(35, 35, 35))
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(121, 121, 121)
+                .addComponent(JoinButton)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(44, 44, 44)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(NewLabel)
-                    .addComponent(CreateButton))
-                .addGap(94, 94, 94)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(AddLabel)
-                    .addComponent(JoinButton))
-                .addContainerGap(102, Short.MAX_VALUE))
+                .addGap(72, 72, 72)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(AddLabel))
+                .addGap(28, 28, 28)
+                .addComponent(JoinButton)
+                .addContainerGap(133, Short.MAX_VALUE))
         );
 
-        javax.swing.GroupLayout jDialog1Layout = new javax.swing.GroupLayout(jDialog1.getContentPane());
-        jDialog1.getContentPane().setLayout(jDialog1Layout);
-        jDialog1Layout.setHorizontalGroup(
-            jDialog1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        javax.swing.GroupLayout JoinDialogLayout = new javax.swing.GroupLayout(JoinDialog.getContentPane());
+        JoinDialog.getContentPane().setLayout(JoinDialogLayout);
+        JoinDialogLayout.setHorizontalGroup(
+            JoinDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
-        jDialog1Layout.setVerticalGroup(
-            jDialog1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        JoinDialogLayout.setVerticalGroup(
+            JoinDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("SARChat");
-        setMinimumSize(new java.awt.Dimension(600, 600));
+        setMinimumSize(new java.awt.Dimension(400, 200));
+        setPreferredSize(new java.awt.Dimension(500, 280));
 
         containersGroup.setBackground(new java.awt.Color(199, 234, 236));
 
-        TitleBoxGroup.setText("Available person");
-
         personAvailablePanel.setBackground(new java.awt.Color(199, 234, 236));
 
-        groupList.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public Object getElementAt(int i) { return strings[i]; }
-        });
+        model = new DefaultListModel();
+        groupList.setBackground(new java.awt.Color(199, 234, 236));
+        groupList.setModel(model);
         jScrollPane3.setViewportView(groupList);
+
+        TitleBoxGroup.setText("Available person");
 
         javax.swing.GroupLayout personAvailablePanelLayout = new javax.swing.GroupLayout(personAvailablePanel);
         personAvailablePanel.setLayout(personAvailablePanelLayout);
         personAvailablePanelLayout.setHorizontalGroup(
             personAvailablePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(personAvailablePanelLayout.createSequentialGroup()
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addGroup(personAvailablePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(TitleBoxGroup))
+                .addGap(0, 26, Short.MAX_VALUE))
         );
         personAvailablePanelLayout.setVerticalGroup(
             personAvailablePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 330, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, personAvailablePanelLayout.createSequentialGroup()
+                .addComponent(TitleBoxGroup)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 309, Short.MAX_VALUE))
         );
+
+        NameLabel.setText("Name");
 
         javax.swing.GroupLayout containersGroupLayout = new javax.swing.GroupLayout(containersGroup);
         containersGroup.setLayout(containersGroupLayout);
@@ -161,17 +168,17 @@ public class GUI extends javax.swing.JFrame implements PeerEventListener{
             .addGroup(containersGroupLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(containersGroupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(personAvailablePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(containersGroupLayout.createSequentialGroup()
-                        .addComponent(TitleBoxGroup)
-                        .addContainerGap(51, Short.MAX_VALUE))
-                    .addComponent(personAvailablePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(NameLabel)
+                        .addGap(0, 0, Short.MAX_VALUE))))
         );
         containersGroupLayout.setVerticalGroup(
             containersGroupLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(containersGroupLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(TitleBoxGroup)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(10, 10, 10)
+                .addComponent(NameLabel)
+                .addGap(18, 18, 18)
                 .addComponent(personAvailablePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
@@ -187,19 +194,21 @@ public class GUI extends javax.swing.JFrame implements PeerEventListener{
         containersDialog.setLayout(containersDialogLayout);
         containersDialogLayout.setHorizontalGroup(
             containersDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(containersDialogLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane2)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, containersDialogLayout.createSequentialGroup()
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 605, Short.MAX_VALUE)
                 .addContainerGap())
         );
         containersDialogLayout.setVerticalGroup(
             containersDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane2)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, containersDialogLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane2))
         );
 
         containersWrite.setBackground(java.awt.Color.white);
         containersWrite.setForeground(java.awt.Color.white);
 
+        SendButton.setMnemonic('\n');
         SendButton.setText("Send");
         SendButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -207,31 +216,53 @@ public class GUI extends javax.swing.JFrame implements PeerEventListener{
             }
         });
 
-        sendMessageTextArea.setColumns(20);
-        sendMessageTextArea.setRows(5);
-        jScrollPane1.setViewportView(sendMessageTextArea);
+        BurstToggleButton.setText("Burst Play");
+        BurstToggleButton.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                BurstToggleButtonItemStateChanged(evt);
+            }
+        });
+        BurstToggleButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                BurstToggleButtonActionPerformed(evt);
+            }
+        });
+
+        sendMessageTextArea.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                sendMessageTextAreaKeyPressed(evt);
+            }
+        });
 
         javax.swing.GroupLayout containersWriteLayout = new javax.swing.GroupLayout(containersWrite);
         containersWrite.setLayout(containersWriteLayout);
         containersWriteLayout.setHorizontalGroup(
             containersWriteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, containersWriteLayout.createSequentialGroup()
+            .addGroup(containersWriteLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 534, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(SendButton)
-                .addContainerGap())
+                .addComponent(sendMessageTextArea)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(containersWriteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(SendButton)
+                    .addComponent(BurstToggleButton))
+                .addGap(26, 26, 26))
         );
         containersWriteLayout.setVerticalGroup(
             containersWriteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, containersWriteLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(SendButton)
-                .addGap(32, 32, 32))
             .addGroup(containersWriteLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(containersWriteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(containersWriteLayout.createSequentialGroup()
+                        .addGap(1, 1, 1)
+                        .addComponent(sendMessageTextArea))
+                    .addGroup(containersWriteLayout.createSequentialGroup()
+                        .addGroup(containersWriteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(containersWriteLayout.createSequentialGroup()
+                                .addGap(32, 32, 32)
+                                .addComponent(BurstToggleButton))
+                            .addComponent(SendButton))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
         );
 
         fileMenu.setMnemonic('f');
@@ -325,22 +356,47 @@ public class GUI extends javax.swing.JFrame implements PeerEventListener{
     }//GEN-LAST:event_exitMenuItemActionPerformed
 
     private void SendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SendButtonActionPerformed
-       String textTape;
-       textTape = sendMessageTextArea.getText();
-        try {
-            peer.sendTextMessage(textTape);
-        } catch (IOException ex) {
-            Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
-        }       
+       actionSend();
     }//GEN-LAST:event_SendButtonActionPerformed
 
     private void JoinButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JoinButtonActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_JoinButtonActionPerformed
 
-    private void CreateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CreateButtonActionPerformed
+    private void BurstToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BurstToggleButtonActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_CreateButtonActionPerformed
+    }//GEN-LAST:event_BurstToggleButtonActionPerformed
+
+    private void BurstToggleButtonItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_BurstToggleButtonItemStateChanged
+        if(evt.getStateChange()==ItemEvent.SELECTED){
+        System.out.println("button is selected");
+        BurstToggleButton.setText("Burst Stop");
+      } else if(evt.getStateChange()==ItemEvent.DESELECTED){
+        System.out.println("button is not selected");
+        BurstToggleButton.setText("Burst Play");
+      }
+    }//GEN-LAST:event_BurstToggleButtonItemStateChanged
+
+    private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextField1ActionPerformed
+
+    private void sendMessageTextAreaKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_sendMessageTextAreaKeyPressed
+       if(evt.getKeyCode() == KeyEvent.VK_ENTER){
+            actionSend();
+        }
+    }//GEN-LAST:event_sendMessageTextAreaKeyPressed
+
+    private void actionSend(){
+        String textTape;
+       textTape = sendMessageTextArea.getText();
+        try {
+            peer.sendTextMessage(textTape);
+        } catch (IOException ex) {
+            Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
+        }   
+        sendMessageTextArea.setText("");
+    }     
 
     /**
      * @param args the command line arguments
@@ -375,14 +431,16 @@ public class GUI extends javax.swing.JFrame implements PeerEventListener{
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new GUI(pe).setVisible(true);
+               
             }
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel AddLabel;
-    private javax.swing.JButton CreateButton;
+    private javax.swing.JToggleButton BurstToggleButton;
     private javax.swing.JButton JoinButton;
-    private javax.swing.JLabel NewLabel;
+    private javax.swing.JDialog JoinDialog;
+    private javax.swing.JLabel NameLabel;
     private javax.swing.JButton SendButton;
     private javax.swing.JLabel TitleBoxGroup;
     private javax.swing.JMenuItem aboutMenuItem;
@@ -399,27 +457,49 @@ public class GUI extends javax.swing.JFrame implements PeerEventListener{
     private javax.swing.JMenu fileMenu;
     private javax.swing.JList groupList;
     private javax.swing.JMenu helpMenu;
-    private javax.swing.JDialog jDialog1;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JTextField jTextField1;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem openMenuItem;
     private javax.swing.JMenuItem pasteMenuItem;
     private javax.swing.JPanel personAvailablePanel;
     private javax.swing.JMenuItem saveAsMenuItem;
     private javax.swing.JMenuItem saveMenuItem;
-    private javax.swing.JTextArea sendMessageTextArea;
+    private javax.swing.JTextField sendMessageTextArea;
     // End of variables declaration//GEN-END:variables
-
+    private DefaultListModel model;
+    
     @Override
     public void groupIsReady(GroupTable group) {
-        throw new UnsupportedOperationException("Not supported yet.");
+      javax.swing.JLabel label;
+      label = new javax.swing.JLabel();
+      for (User user : group){
+            model.addElement(user.name);
+        }
+      NameLabel.setText(peer.getMyName());
+      chatMessageTextArea.setEnabled(false);
+
     }
 
     @Override
     public void messageDelivered(String message, User sender) {
+        chatMessageTextArea.append(sender.name+" : "+ message+"\n");
+    }
+
+    @Override
+    public void peerDown(User user) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void peerUp(User user) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void burstStopAnotherUser() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }
