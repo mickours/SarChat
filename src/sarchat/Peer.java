@@ -1,10 +1,17 @@
 package sarchat;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -12,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import sarchat.message.AckMessage;
 import sarchat.message.AckMulticastMessage;
+import sarchat.message.HeartBeatMessage;
 import sarchat.message.JoinMessage;
 import sarchat.message.LogicalClock;
 import sarchat.message.Message;
@@ -34,10 +42,18 @@ public class Peer extends NIOSocketAgent {
     final long serverTimout = 10000;//10s
     private PeerEventListener listener;
     private boolean inBurst;
+    //Pour udp heartbeat
+    private ByteBuffer dataByteBufferUDP;
+    private DatagramChannel dataChan;
+    private HashMap<User, Timer> mapUserTimer;
+    private long heartBeatTimeout = 10000;
+    private long timeBetweenHeartBeats = 1000;
+    private Timer heartBeatTimer;
 
     public Peer(String myName, final List<String> groupToJoin) {
         super();
         myGroup = new GroupTable();
+        heartBeatTimer = new Timer(true);
         for (String userName : groupToJoin) {
             myGroup.add(new User(userName));
         }
@@ -108,12 +124,12 @@ public class Peer extends NIOSocketAgent {
         return inBurst;
     }
 
-    public void startBurst(){
+    public void startBurst() {
         inBurst = true;
         doBurst();
     }
 
-    public void stopBurst(){
+    public void stopBurst() {
         inBurst = false;
     }
 
@@ -182,6 +198,7 @@ public class Peer extends NIOSocketAgent {
         if (msg instanceof AckMessage) {
             joinTimer.cancel();
             connectToGroupMembers();
+            //initHeartBeats();
             fireGroupIsReadyEvent();
         }
     }
@@ -204,9 +221,9 @@ public class Peer extends NIOSocketAgent {
             AckMulticastMessage ack = (AckMulticastMessage) msg;
             if (msgQueue.ackReceived(from, ack.getTextMsg(), myGroup)) {
                 Tuple toDeliver;
-                while((toDeliver = msgQueue.getToDeliverMessage()) != null){
+                while ((toDeliver = msgQueue.getToDeliverMessage()) != null) {
                     fireMessageDeliveredEvent(toDeliver.msg.getMessage(), toDeliver.msg.getSender());
-                    System.out.println("DELIVER "+toDeliver.msg);
+                    System.out.println("DELIVER " + toDeliver.msg);
                     //log.log(Level.INFO, "{0}{1}", new Object[]{toDeliver.sender, toDeliver.toString()});
                 }
             }
@@ -258,7 +275,49 @@ public class Peer extends NIOSocketAgent {
                     .getAddress();
             userSocketChannelMap.put(sender, channel);
         }
-        messageReceived(getUserFromSocket((SocketChannel) key.channel()), msgReceived);
+    }
+
+    //TODO : A revoiir completement ??
+    private HeartBeatMessage readHBM(DatagramChannel socket) throws IOException, ClassNotFoundException {
+        dataByteBufferUDP = ByteBuffer.allocate(4500);
+        socket.receive(dataByteBufferUDP);
+
+        //TODO : Verifier qu'on a reçu au moins 4...
+
+        int tailleMsg = dataByteBufferUDP.getInt(0);
+        //TODO : verifier qu'on a reçu taille  + 4...
+        ByteArrayInputStream bais = new ByteArrayInputStream(dataByteBufferUDP.array());
+        //TODO séparer pour récupérer que ce que l'on veut...
+        ObjectInputStream ois = new ObjectInputStream(bais);
+        final HeartBeatMessage ret = (HeartBeatMessage) ois.readObject();
+        return ret;
+    }
+
+    private void sendHBM() {
+        if (dataChan != null) {
+            for (User user : myGroup.getAllOtherThanMe(me)) {
+                try {
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    for (int i = 0; i < 4; i++) {
+                        baos.write(0);
+                    }
+                    ObjectOutputStream oos = new ObjectOutputStream(baos);
+                    oos.writeObject(new HeartBeatMessage(me));
+                    oos.close();
+                    final ByteBuffer wrap = ByteBuffer.wrap(baos.toByteArray());
+                    wrap.putInt(0, baos.size() - 4);
+                    dataChan.send(wrap, new InetSocketAddress(user.ip, user.port + 1));
+                } catch (IOException ex) {
+                    Logger.getLogger(Peer.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        heartBeatTimer.schedule((new TimerTask() {
+            @Override
+            public void run() {
+                sendHBM();
+            }
+        }), timeBetweenHeartBeats);
     }
 
     private void connectToGroupMembers() {
@@ -268,11 +327,44 @@ public class Peer extends NIOSocketAgent {
         }
     }
 
-    String getMyName() {
+    private void prepareTimer(final User user) {
+        Timer t = new Timer(true);
+        mapUserTimer.put(user, t);
+        t.schedule((new TimerTask() {
+            @Override
+            public void run() {
+                //TODO : user est mort
+                System.out.println("TimerMouru");
+            }
+        }), heartBeatTimeout);
+    }
+
+    public String getMyName() {
         return me.name;
     }
 
-    GroupTable getMyGroup() {
+    public GroupTable getMyGroup() {
         return myGroup;
+    }
+
+    private void initMapUserTimer() {
+        mapUserTimer = new HashMap<>();
+        for (User user : this.myGroup.getAllOtherThanMe(me)) {
+            prepareTimer(user);
+        }
+    }
+
+    private void initDatagramChannel() throws IOException {
+        dataChan = DatagramChannel.open();
+        dataChan.socket().setReuseAddress(true);
+        dataChan.socket().bind(new InetSocketAddress(me.port + 1));
+        dataChan.configureBlocking(false);
+        dataChan.register(selector, SelectionKey.OP_READ);
+    }
+
+    private void initHeartBeats() throws IOException {
+        initDatagramChannel();
+        initMapUserTimer();
+        sendHBM();
     }
 }

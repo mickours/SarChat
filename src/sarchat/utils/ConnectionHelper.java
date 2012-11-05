@@ -14,6 +14,7 @@ public class ConnectionHelper {
             //Pour pouvoir reutiliser le port si close pas fait
             socket.setReuseAddress(true);
             socket.close();
+            //TODO : meme port udp libre
         } catch (IOException ex) {
             //Ne rien faire, on renverra -1
         }
